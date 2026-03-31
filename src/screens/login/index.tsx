@@ -13,15 +13,22 @@ import {
 import type { TextInputProps } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { CustomButton } from "../../components/common";
+import {
+  CustomButton,
+  EyeIcon,
+  LockIcon,
+  MailIcon,
+} from "../../components/common";
 import { colors } from "../../theme/colors";
 import { images } from "../../theme/images";
+import { styles } from "./styles";
 
 type LoginScreenProps = {
   onRegister?: () => void;
 };
 
 type LoginFieldProps = {
+  icon: "mail" | "lock";
   label: string;
   value: string;
   onChangeText: (text: string) => void;
@@ -29,6 +36,7 @@ type LoginFieldProps = {
   secureTextEntry?: boolean;
   keyboardType?: TextInputProps["keyboardType"];
   autoCapitalize?: TextInputProps["autoCapitalize"];
+  rightAccessory?: React.ReactNode;
 };
 
 type SocialProvider = {
@@ -42,9 +50,9 @@ function hexToRgba(hexColor: string, opacity: number): string {
   const sixDigitHex =
     normalizedHex.length === 3
       ? normalizedHex
-          .split("")
-          .map((character) => `${character}${character}`)
-          .join("")
+        .split("")
+        .map((character) => `${character}${character}`)
+        .join("")
       : normalizedHex;
 
   const red = Number.parseInt(sixDigitHex.slice(0, 2), 16);
@@ -79,28 +87,39 @@ const SOCIAL_PROVIDERS: SocialProvider[] = [
 function PatternHeader(): React.JSX.Element {
   return (
     <View style={styles.header}>
-      <View style={styles.headerOrbLarge} />
-      <View style={styles.headerOrbSmall} />
-      <View style={styles.headerRibbon} />
-      <View style={styles.headerArc} />
-      <View style={styles.headerDotRow}>
-        <View style={styles.headerDot} />
-        <View style={styles.headerDot} />
-        <View style={styles.headerDot} />
+      <View style={{ ...styles.headerOrbLarge, backgroundColor: HEADER_GLOW, }} />
+      <View style={{ ...styles.headerOrbSmall, backgroundColor: HEADER_DARK_ACCENT, }} />
+      <View style={{ ...styles.headerRibbon, backgroundColor: HEADER_SOFT_LIGHT, }} />
+      <View style={{ ...styles.headerArc, borderColor: HEADER_SOFT_LIGHT, }} />
+      <View style={{ ...styles.headerDotRow, backgroundColor: HEADER_GLOW, }}>
+        <View style={{ ...styles.headerDot, backgroundColor: hexToRgba(colors.white, 0.5), }} />
+        <View style={{ ...styles.headerDot, backgroundColor: hexToRgba(colors.white, 0.5), }} />
+        <View style={{ ...styles.headerDot, backgroundColor: hexToRgba(colors.white, 0.5), }} />
       </View>
-      <View style={styles.logoAura} />
+      <View style={{ ...styles.logoAura, backgroundColor: HEADER_SOFT_LIGHT, }} />
 
-      <View style={styles.logoBadge}>
-        <View style={styles.logoMark}>
-          <View style={styles.logoCircle} />
-          <View style={styles.logoCut} />
+      <View style={{ ...styles.logoBadge, borderColor: hexToRgba(colors.white, 0.35), }}>
+        <View style={{ ...styles.logoMark }}>
+          <View style={{ ...styles.logoCircle }} />
+          <View style={{ ...styles.logoCut }} />
         </View>
       </View>
     </View>
   );
 }
 
+function FieldIcon({
+  icon,
+}: Pick<LoginFieldProps, "icon">): React.JSX.Element {
+  if (icon === "lock") {
+    return <LockIcon />;
+  }
+
+  return <MailIcon />;
+}
+
 function LoginField({
+  icon,
   label,
   value,
   onChangeText,
@@ -108,21 +127,32 @@ function LoginField({
   secureTextEntry,
   keyboardType,
   autoCapitalize,
+  rightAccessory,
 }: LoginFieldProps): React.JSX.Element {
   return (
     <View style={styles.fieldCard}>
       <Text style={styles.fieldLabel}>{label}</Text>
-      <TextInput
-        style={styles.fieldInput}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor="#C1C4CC"
-        secureTextEntry={secureTextEntry}
-        keyboardType={keyboardType}
-        autoCapitalize={autoCapitalize}
-        selectionColor="#111111"
-      />
+      <View style={styles.fieldRow}>
+        <View style={styles.fieldIconWrap}>
+          <FieldIcon icon={icon} />
+        </View>
+        <View style={styles.fieldControl}>
+          <TextInput
+            style={styles.fieldInput}
+            value={value}
+            onChangeText={onChangeText}
+            placeholder={placeholder}
+            placeholderTextColor="#C1C4CC"
+            secureTextEntry={secureTextEntry}
+            keyboardType={keyboardType}
+            autoCapitalize={autoCapitalize}
+            selectionColor="#111111"
+          />
+        </View>
+        {rightAccessory ? (
+          <View style={styles.fieldAccessory}>{rightAccessory}</View>
+        ) : null}
+      </View>
     </View>
   );
 }
@@ -156,6 +186,7 @@ function SocialLoginButton({
 function LoginScreen({ onRegister }: LoginScreenProps): React.JSX.Element {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = () => {
     if (!email || !password) {
@@ -202,6 +233,7 @@ function LoginScreen({ onRegister }: LoginScreenProps): React.JSX.Element {
 
             <View style={styles.formGroup}>
               <LoginField
+                icon="mail"
                 label="Email"
                 value={email}
                 onChangeText={setEmail}
@@ -211,11 +243,20 @@ function LoginScreen({ onRegister }: LoginScreenProps): React.JSX.Element {
               />
 
               <LoginField
+                icon="lock"
                 label="Password"
                 value={password}
                 onChangeText={setPassword}
                 placeholder="........"
-                secureTextEntry
+                secureTextEntry={!showPassword}
+                rightAccessory={
+                  <Pressable
+                    onPress={() => setShowPassword((current) => !current)}
+                    hitSlop={10}
+                  >
+                    <EyeIcon />
+                  </Pressable>
+                }
               />
             </View>
 
@@ -255,241 +296,5 @@ function LoginScreen({ onRegister }: LoginScreenProps): React.JSX.Element {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  card: {
-    backgroundColor: colors.primary,
-    flex: 1,
-    width: "100%",
-  },
-  header: {
-    alignItems: "center",
-    backgroundColor: colors.primary,
-    height: 190,
-    overflow: "hidden",
-    paddingTop: 87,
-    position: "relative",
-  },
-  headerOrbLarge: {
-    backgroundColor: HEADER_GLOW,
-    borderRadius: 110,
-    height: 220,
-    left: -56,
-    position: "absolute",
-    top: -76,
-    width: 220,
-  },
-  headerOrbSmall: {
-    backgroundColor: HEADER_DARK_ACCENT,
-    borderRadius: 76,
-    height: 152,
-    position: "absolute",
-    right: -24,
-    top: 26,
-    width: 152,
-  },
-  headerRibbon: {
-    backgroundColor: HEADER_SOFT_LIGHT,
-    borderRadius: 40,
-    height: 88,
-    position: "absolute",
-    right: -40,
-    top: 44,
-    transform: [{ rotate: "-18deg" }],
-    width: 220,
-  },
-  headerArc: {
-    borderColor: HEADER_SOFT_LIGHT,
-    borderRadius: 82,
-    borderWidth: 18,
-    height: 164,
-    left: -34,
-    position: "absolute",
-    top: 58,
-    width: 164,
-  },
-  headerDotRow: {
-    flexDirection: "row",
-    gap: 8,
-    position: "absolute",
-    right: 26,
-    top: 28,
-  },
-  headerDot: {
-    backgroundColor: hexToRgba(colors.white, 0.5),
-    borderRadius: 4,
-    height: 8,
-    width: 8,
-  },
-  logoAura: {
-    backgroundColor: HEADER_SOFT_LIGHT,
-    borderRadius: 46,
-    height: 92,
-    left: "50%",
-    marginLeft: -46,
-    position: "absolute",
-    top: 70,
-    width: 92,
-  },
-  logoBadge: {
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderColor: hexToRgba(colors.white, 0.35),
-    borderRadius: 14,
-    borderWidth: 1,
-    height: 58,
-    justifyContent: "center",
-    shadowColor: "#0C4A4A",
-    shadowOffset: {
-      width: 0,
-      height: 12,
-    },
-    shadowOpacity: 0.16,
-    shadowRadius: 18,
-    width: 58,
-  },
-  logoMark: {
-    height: 28,
-    position: "relative",
-    width: 28,
-  },
-  logoCircle: {
-    backgroundColor: colors.primary,
-    borderRadius: 14,
-    height: 28,
-    position: "absolute",
-    right: 0,
-    top: 0,
-    width: 28,
-  },
-  logoCut: {
-    backgroundColor: colors.surface,
-    height: 28,
-    left: 0,
-    position: "absolute",
-    top: 0,
-    width: 10,
-  },
-  content: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: 60,
-    flex: 1,
-    paddingBottom: 28,
-    paddingHorizontal: 24,
-    paddingTop: 38,
-  },
-  title: {
-    color: "#1F1F1F",
-    fontSize: 22,
-    fontWeight: "700",
-    marginBottom: 34,
-    textAlign: "center",
-  },
-  formGroup: {
-    gap: 14,
-  },
-  fieldCard: {
-    backgroundColor: colors.surface,
-    borderColor: "#F4F4F5",
-    borderRadius: 16,
-    borderWidth: 1,
-    elevation: 3,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    shadowColor: "#D4D9E2",
-    shadowOffset: {
-      width: 0,
-      height: 8,
-    },
-    shadowOpacity: 0.18,
-    shadowRadius: 16,
-  },
-  fieldLabel: {
-    color: "#1F1F1F",
-    fontSize: 12,
-    fontWeight: "600",
-    marginBottom: 6,
-  },
-  fieldInput: {
-    color: "#1F1F1F",
-    fontSize: 14,
-    paddingVertical: 0,
-  },
-  loginButton: {
-    marginTop: 22,
-  },
-  socialSection: {
-    marginTop: 26,
-  },
-  socialDivider: {
-    alignItems: "center",
-    flexDirection: "row",
-    marginBottom: 18,
-  },
-  socialDividerLine: {
-    backgroundColor: "#E7EAF0",
-    flex: 1,
-    height: 1,
-  },
-  socialDividerText: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    fontWeight: "600",
-    marginHorizontal: 12,
-  },
-  socialButtons: {
-    flexDirection: "row",
-    gap: 16,
-    justifyContent: "center",
-  },
-  socialButton: {
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderColor: "#E9EDF4",
-    borderRadius: 18,
-    borderWidth: 1,
-    elevation: 3,
-    height: 58,
-    justifyContent: "center",
-    shadowColor: "#CBD4E3",
-    shadowOffset: {
-      width: 0,
-      height: 8,
-    },
-    shadowOpacity: 0.14,
-    shadowRadius: 14,
-    width: 58,
-  },
-  socialButtonPressed: {
-    opacity: 0.96,
-    transform: [{ scale: 0.995 }],
-  },
-  socialIconImage: {
-    height: 24,
-    width: 24,
-  },
-  footer: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 40,
-  },
-  footerText: {
-    color: "#4B5563",
-    fontSize: 13,
-  },
-  footerLink: {
-    color: "#111111",
-    fontSize: 13,
-    fontWeight: "700",
-  },
-});
 
 export default LoginScreen;

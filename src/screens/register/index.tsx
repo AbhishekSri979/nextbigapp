@@ -13,8 +13,14 @@ import {
 import type { TextInputProps } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { CustomButton } from "../../components/common";
+import {
+  ChevronDownIcon,
+  CustomButton,
+  EyeIcon,
+  InfoIcon,
+} from "../../components/common";
 import { colors } from "../../theme/colors";
+import { styles } from "./styles";
 
 type RegisterScreenProps = {
   onLogin?: () => void;
@@ -183,53 +189,26 @@ const HEADER_DARK_ACCENT = "rgba(0, 0, 0, 0.08)";
 function PatternHeader(): React.JSX.Element {
   return (
     <View style={styles.header}>
-      <View style={styles.headerOrbLarge} />
-      <View style={styles.headerOrbSmall} />
-      <View style={styles.headerRibbon} />
-      <View style={styles.headerArc} />
-      <View style={styles.headerDotRow}>
-        <View style={styles.headerDot} />
-        <View style={styles.headerDot} />
-        <View style={styles.headerDot} />
+      <View style={{ ...styles.headerOrbLarge, backgroundColor: HEADER_GLOW, }} />
+      <View style={{ ...styles.headerOrbSmall, backgroundColor: HEADER_DARK_ACCENT, }} />
+      <View style={{ ...styles.headerRibbon, backgroundColor: HEADER_SOFT_LIGHT, }} />
+      <View style={{ ...styles.headerArc, borderColor: HEADER_SOFT_LIGHT, }} />
+      <View style={{ ...styles.headerDotRow, backgroundColor: HEADER_GLOW, }}>
+        <View style={{ ...styles.headerDot, backgroundColor: hexToRgba(colors.white, 0.5), }} />
+        <View style={{ ...styles.headerDot, backgroundColor: hexToRgba(colors.white, 0.5), }} />
+        <View style={{ ...styles.headerDot, backgroundColor: hexToRgba(colors.white, 0.5), }} />
       </View>
-      <View style={styles.logoAura} />
+      <View style={{ ...styles.logoAura, backgroundColor: HEADER_SOFT_LIGHT, }} />
 
-      <View style={styles.logoBadge}>
-        <View style={styles.logoMark}>
-          <View style={styles.logoCircle} />
-          <View style={styles.logoCut} />
+      <View style={{ ...styles.logoBadge, borderColor: hexToRgba(colors.white, 0.35), }}>
+        <View style={{ ...styles.logoMark }}>
+          <View style={{ ...styles.logoCircle }} />
+          <View style={{ ...styles.logoCut }} />
         </View>
       </View>
     </View>
   );
 }
-
-function EyeIcon(): React.JSX.Element {
-  return (
-    <View style={styles.eyeIcon}>
-      <View style={styles.eyePupil} />
-    </View>
-  );
-}
-
-function InfoIcon(): React.JSX.Element {
-  return (
-    <View style={styles.infoIcon}>
-      <View style={styles.infoIconDot} />
-      <View style={styles.infoIconStem} />
-    </View>
-  );
-}
-
-function ChevronDownIcon(): React.JSX.Element {
-  return (
-    <View style={styles.chevronDown}>
-      <View style={styles.chevronDownLeft} />
-      <View style={styles.chevronDownRight} />
-    </View>
-  );
-}
-
 function RegisterField({
   label,
   value,
@@ -507,7 +486,7 @@ function RegisterScreen({
           <View style={styles.calendarCard}>
             <View style={styles.calendarHeader}>
               <Pressable
-                style={styles.calendarNavButton}
+                style={{...styles.calendarNavButton,backgroundColor: hexToRgba(colors.primary, 0.1)}}
                 onPress={() =>
                   setCalendarMonth((currentMonth) =>
                     addMonths(currentMonth, -1)
@@ -526,6 +505,7 @@ function RegisterScreen({
                 style={[
                   styles.calendarNavButton,
                   !canGoToNextMonth ? styles.calendarNavButtonDisabled : null,
+                  { backgroundColor: hexToRgba(colors.primary, 0.1) }
                 ]}
                 onPress={() =>
                   canGoToNextMonth
@@ -590,397 +570,5 @@ function RegisterScreen({
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  screen: {
-    backgroundColor: colors.surface,
-    flex: 1,
-    width: "100%",
-  },
-  header: {
-    alignItems: "center",
-    backgroundColor: colors.primary,
-    height: 190,
-    overflow: "hidden",
-    paddingTop: 60,
-    position: "relative",
-  },
-  headerOrbLarge: {
-    backgroundColor: HEADER_GLOW,
-    borderRadius: 110,
-    height: 220,
-    left: -56,
-    position: "absolute",
-    top: -76,
-    width: 220,
-  },
-  headerOrbSmall: {
-    backgroundColor: HEADER_DARK_ACCENT,
-    borderRadius: 76,
-    height: 152,
-    position: "absolute",
-    right: -24,
-    top: 26,
-    width: 152,
-  },
-  headerRibbon: {
-    backgroundColor: HEADER_SOFT_LIGHT,
-    borderRadius: 40,
-    height: 88,
-    position: "absolute",
-    right: -40,
-    top: 44,
-    transform: [{ rotate: "-18deg" }],
-    width: 220,
-  },
-  headerArc: {
-    borderColor: HEADER_SOFT_LIGHT,
-    borderRadius: 82,
-    borderWidth: 18,
-    height: 164,
-    left: -34,
-    position: "absolute",
-    top: 58,
-    width: 164,
-  },
-  headerDotRow: {
-    flexDirection: "row",
-    gap: 8,
-    position: "absolute",
-    right: 26,
-    top: 28,
-  },
-  headerDot: {
-    backgroundColor: hexToRgba(colors.white, 0.5),
-    borderRadius: 4,
-    height: 8,
-    width: 8,
-  },
-  logoAura: {
-    backgroundColor: HEADER_SOFT_LIGHT,
-    borderRadius: 46,
-    height: 92,
-    left: "50%",
-    marginLeft: -46,
-    position: "absolute",
-    top: 42,
-    width: 92,
-  },
-  logoBadge: {
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderColor: hexToRgba(colors.white, 0.35),
-    borderRadius: 14,
-    borderWidth: 1,
-    height: 58,
-    justifyContent: "center",
-    shadowColor: "#0C4A4A",
-    shadowOffset: {
-      width: 0,
-      height: 12,
-    },
-    shadowOpacity: 0.16,
-    shadowRadius: 18,
-    width: 58,
-  },
-  logoMark: {
-    height: 28,
-    position: "relative",
-    width: 28,
-  },
-  logoCircle: {
-    backgroundColor: colors.primary,
-    borderRadius: 14,
-    height: 28,
-    position: "absolute",
-    right: 0,
-    top: 0,
-    width: 28,
-  },
-  logoCut: {
-    backgroundColor: colors.surface,
-    height: 28,
-    left: 0,
-    position: "absolute",
-    top: 0,
-    width: 10,
-  },
-  content: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: 100,
-    borderTopRightRadius: 20,
-    flex: 1,
-    marginTop: -50,
-    paddingBottom: 28,
-    paddingHorizontal: 24,
-    paddingTop: 38,
-  },
-  title: {
-    color: "#1F1F1F",
-    fontSize: 22,
-    fontWeight: "700",
-    marginBottom: 28,
-    textAlign: "center",
-  },
-  formGroup: {
-    gap: 14,
-  },
-  fieldBlock: {
-    gap: 6,
-  },
-  fieldCard: {
-    backgroundColor: colors.surface,
-    borderColor: "#F4F4F5",
-    borderRadius: 16,
-    borderWidth: 1,
-    elevation: 3,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    shadowColor: "#D4D9E2",
-    shadowOffset: {
-      width: 0,
-      height: 8,
-    },
-    shadowOpacity: 0.18,
-    shadowRadius: 16,
-  },
-  fieldCardError: {
-    borderColor: "#F0B6B8",
-  },
-  fieldLabel: {
-    color: "#1F1F1F",
-    fontSize: 12,
-    fontWeight: "600",
-    marginBottom: 6,
-  },
-  fieldRow: {
-    alignItems: "center",
-    flexDirection: "row",
-  },
-  fieldControl: {
-    flex: 1,
-  },
-  fieldValueWrap: {
-    minHeight: 20,
-    justifyContent: "center",
-  },
-  fieldInput: {
-    color: "#1F1F1F",
-    fontSize: 14,
-    paddingVertical: 0,
-  },
-  fieldPlaceholderText: {
-    color: "#C1C4CC",
-  },
-  fieldAccessory: {
-    marginLeft: 12,
-  },
-  passwordAccessoryRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 10,
-  },
-  accessoryButton: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  eyeIcon: {
-    alignItems: "center",
-    borderColor: "#97A3BD",
-    borderRadius: 12,
-    borderWidth: 1.4,
-    height: 12,
-    justifyContent: "center",
-    transform: [{ scaleY: 0.8 }],
-    width: 18,
-  },
-  eyePupil: {
-    backgroundColor: "#97A3BD",
-    borderRadius: 2,
-    height: 4,
-    width: 4,
-  },
-  infoIcon: {
-    alignItems: "center",
-    borderColor: "#97A3BD",
-    borderRadius: 7,
-    borderWidth: 1.4,
-    height: 14,
-    justifyContent: "center",
-    width: 14,
-  },
-  infoIconDot: {
-    backgroundColor: "#97A3BD",
-    borderRadius: 1.1,
-    height: 2.2,
-    marginBottom: 1.2,
-    width: 2.2,
-  },
-  infoIconStem: {
-    backgroundColor: "#97A3BD",
-    borderRadius: 1,
-    height: 4.5,
-    width: 2,
-  },
-  chevronDown: {
-    height: 12,
-    position: "relative",
-    width: 16,
-  },
-  chevronDownLeft: {
-    backgroundColor: "#97A3BD",
-    height: 1.6,
-    left: 1,
-    position: "absolute",
-    top: 6,
-    transform: [{ rotate: "38deg" }],
-    width: 8,
-  },
-  chevronDownRight: {
-    backgroundColor: "#97A3BD",
-    height: 1.6,
-    position: "absolute",
-    right: 1,
-    top: 6,
-    transform: [{ rotate: "-38deg" }],
-    width: 8,
-  },
-  helperText: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    lineHeight: 18,
-    paddingHorizontal: 4,
-  },
-  errorText: {
-    color: "#D14343",
-    fontSize: 12,
-    fontWeight: "500",
-    paddingHorizontal: 4,
-  },
-  registerButton: {
-    marginTop: 24,
-  },
-  footer: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 36,
-  },
-  footerText: {
-    color: "#4B5563",
-    fontSize: 13,
-  },
-  footerLink: {
-    color: "#111111",
-    fontSize: 13,
-    fontWeight: "700",
-  },
-  modalOverlay: {
-    backgroundColor: "rgba(15, 23, 42, 0.32)",
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 20,
-  },
-  calendarCard: {
-    backgroundColor: colors.surface,
-    borderRadius: 26,
-    elevation: 10,
-    padding: 20,
-    shadowColor: "#0F172A",
-    shadowOffset: {
-      width: 0,
-      height: 18,
-    },
-    shadowOpacity: 0.18,
-    shadowRadius: 24,
-  },
-  calendarHeader: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 18,
-  },
-  calendarNavButton: {
-    alignItems: "center",
-    backgroundColor: hexToRgba(colors.primary, 0.1),
-    borderRadius: 12,
-    height: 36,
-    justifyContent: "center",
-    width: 36,
-  },
-  calendarNavButtonDisabled: {
-    opacity: 0.35,
-  },
-  calendarNavText: {
-    color: colors.primary,
-    fontSize: 18,
-    fontWeight: "700",
-  },
-  calendarTitle: {
-    color: colors.textPrimary,
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  weekRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 10,
-  },
-  weekDayText: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    fontWeight: "700",
-    textAlign: "center",
-    width: `${100 / 7}%`,
-  },
-  calendarGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-  dayCell: {
-    alignItems: "center",
-    borderRadius: 12,
-    height: 40,
-    justifyContent: "center",
-    marginBottom: 8,
-    width: `${100 / 7}%`,
-  },
-  dayCellSelected: {
-    backgroundColor: colors.primary,
-  },
-  dayCellText: {
-    color: colors.textPrimary,
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  dayCellTextMuted: {
-    color: "#B7C0D1",
-  },
-  dayCellTextDisabled: {
-    color: "#D2D8E4",
-  },
-  dayCellTextSelected: {
-    color: colors.white,
-    fontWeight: "700",
-  },
-  calendarCloseButton: {
-    alignItems: "center",
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    marginTop: 10,
-    paddingVertical: 12,
-  },
-  calendarCloseText: {
-    color: colors.white,
-    fontSize: 14,
-    fontWeight: "700",
-  },
-});
 
 export default RegisterScreen;
