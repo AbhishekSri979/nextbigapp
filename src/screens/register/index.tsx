@@ -13,6 +13,7 @@ import {
 import type { TextInputProps } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { CustomButton } from "../../components/common";
 import { colors } from "../../theme/colors";
 
 type RegisterScreenProps = {
@@ -475,15 +476,11 @@ function RegisterScreen({
               />
             </View>
 
-            <Pressable
-              style={({ pressed }) => [
-                styles.registerButton,
-                pressed ? styles.registerButtonPressed : null,
-              ]}
+            <CustomButton
+              title="Register"
               onPress={handleRegister}
-            >
-              <Text style={styles.registerButtonText}>Register</Text>
-            </Pressable>
+              style={styles.registerButton}
+            />
 
             <View style={styles.footer}>
               <Text style={styles.footerText}>Already have an account? </Text>
@@ -867,28 +864,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   registerButton: {
-    alignItems: "center",
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-    elevation: 4,
     marginTop: 24,
-    paddingVertical: 14,
-    shadowColor: "#111111",
-    shadowOffset: {
-      width: 0,
-      height: 10,
-    },
-    shadowOpacity: 0.18,
-    shadowRadius: 16,
-  },
-  registerButtonPressed: {
-    opacity: 0.94,
-    transform: [{ scale: 0.995 }],
-  },
-  registerButtonText: {
-    color: colors.surface,
-    fontSize: 15,
-    fontWeight: "600",
   },
   footer: {
     alignItems: "center",

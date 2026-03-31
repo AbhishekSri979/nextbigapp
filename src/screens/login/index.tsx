@@ -13,6 +13,7 @@ import {
 import type { TextInputProps } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { CustomButton } from "../../components/common";
 import { colors } from "../../theme/colors";
 import { images } from "../../theme/images";
 
@@ -218,15 +219,11 @@ function LoginScreen({ onRegister }: LoginScreenProps): React.JSX.Element {
               />
             </View>
 
-            <Pressable
-              style={({ pressed }) => [
-                styles.loginButton,
-                pressed ? styles.loginButtonPressed : null,
-              ]}
+            <CustomButton
+              title="Login"
               onPress={handleLogin}
-            >
-              <Text style={styles.loginButtonText}>Login</Text>
-            </Pressable>
+              style={styles.loginButton}
+            />
 
             <View style={styles.socialSection}>
               <View style={styles.socialDivider}>
@@ -426,28 +423,7 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
   },
   loginButton: {
-    alignItems: "center",
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-    elevation: 4,
     marginTop: 22,
-    paddingVertical: 14,
-    shadowColor: "#111111",
-    shadowOffset: {
-      width: 0,
-      height: 10,
-    },
-    shadowOpacity: 0.18,
-    shadowRadius: 16,
-  },
-  loginButtonPressed: {
-    opacity: 0.94,
-    transform: [{ scale: 0.995 }],
-  },
-  loginButtonText: {
-    color: colors.surface,
-    fontSize: 15,
-    fontWeight: "600",
   },
   socialSection: {
     marginTop: 26,
