@@ -1,17 +1,26 @@
-import React from 'react';
-import { StatusBar,View } from 'react-native';
+import React, { useState } from 'react';
+import { StatusBar, View } from 'react-native';
 
 import { colors } from '../theme/colors';
 import LoginScreen from '../screens/login';
+import RegisterScreen from '../screens/register';
+
+type AuthScreen = 'login' | 'register';
 
 function App(): React.JSX.Element {
+  const [activeScreen, setActiveScreen] = useState<AuthScreen>('login');
+
   return (
     <View style={{ flex: 1 }}>
       <StatusBar
-        barStyle="dark-content"
-        backgroundColor={colors.background}
+        barStyle="light-content"
+        backgroundColor={colors.authBackground}
       />
-      <LoginScreen/>
+      {activeScreen === 'login' ? (
+        <LoginScreen onRegister={() => setActiveScreen('register')} />
+      ) : (
+        <RegisterScreen onLogin={() => setActiveScreen('login')} />
+      )}
     </View>
   );
 }
