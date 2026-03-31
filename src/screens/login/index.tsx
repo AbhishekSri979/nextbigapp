@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import {
   Alert,
-  Image,
   Pressable,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
@@ -12,12 +12,13 @@ import {
 import type { TextInputProps } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { CustomButton } from "../../components/common";
 import { colors } from "../../theme/colors";
-import { images } from "../../theme/images";
 
-type AuthFieldProps = {
-  icon: "mail" | "lock";
+type LoginScreenProps = {
+  onRegister?: () => void;
+};
+
+type LoginFieldProps = {
   label: string;
   value: string;
   onChangeText: (text: string) => void;
@@ -25,51 +26,54 @@ type AuthFieldProps = {
   secureTextEntry?: boolean;
   keyboardType?: TextInputProps["keyboardType"];
   autoCapitalize?: TextInputProps["autoCapitalize"];
-  rightAccessory?: React.ReactNode;
 };
 
-type LoginScreenProps = {
-  onRegister?: () => void;
-};
+const HEADER_PATTERN = [
+  { top: -14, left: -10, size: 62, radius: 22, rotate: "45deg" },
+  { top: 2, left: 42, size: 70, radius: 35, rotate: "0deg" },
+  { top: -18, left: 114, size: 60, radius: 18, rotate: "45deg" },
+  { top: 8, left: 166, size: 74, radius: 37, rotate: "0deg" },
+  { top: -12, left: 238, size: 58, radius: 18, rotate: "45deg" },
+  { top: 58, left: -18, size: 72, radius: 36, rotate: "0deg" },
+  { top: 72, left: 38, size: 58, radius: 18, rotate: "45deg" },
+  { top: 66, left: 92, size: 74, radius: 36, rotate: "0deg" },
+  { top: 74, left: 168, size: 64, radius: 20, rotate: "45deg" },
+  { top: 60, left: 222, size: 78, radius: 39, rotate: "0deg" },
+] as const;
 
-function MailIcon(): React.JSX.Element {
-  return (
-    <View style={styles.mailIcon}>
-      <View style={styles.mailIconFlapLeft} />
-      <View style={styles.mailIconFlapRight} />
-    </View>
-  );
-}
+const SCREEN_BACKGROUND = colors.white;
 
-function LockIcon(): React.JSX.Element {
+function PatternHeader(): React.JSX.Element {
   return (
-    <View style={styles.lockIcon}>
-      <View style={styles.lockShackle} />
-      <View style={styles.lockBody}>
-        <View style={styles.lockKeyhole} />
+    <View style={styles.header}>
+      {HEADER_PATTERN.map((shape, index) => (
+        <View
+          key={`shape-${index}`}
+          style={[
+            styles.headerShape,
+            {
+              top: shape.top,
+              left: shape.left,
+              width: shape.size,
+              height: shape.size,
+              borderRadius: shape.radius,
+              transform: [{ rotate: shape.rotate }],
+            },
+          ]}
+        />
+      ))}
+
+      <View style={styles.logoBadge}>
+        <View style={styles.logoMark}>
+          <View style={styles.logoCircle} />
+          <View style={styles.logoCut} />
+        </View>
       </View>
     </View>
   );
 }
 
-function EyeIcon(): React.JSX.Element {
-  return (
-    <View style={styles.eyeIcon}>
-      <View style={styles.eyePupil} />
-    </View>
-  );
-}
-
-function FieldIcon({ icon }: Pick<AuthFieldProps, "icon">): React.JSX.Element {
-  if (icon === "lock") {
-    return <LockIcon />;
-  }
-
-  return <MailIcon />;
-}
-
-function AuthField({
-  icon,
+function LoginField({
   label,
   value,
   onChangeText,
@@ -77,30 +81,21 @@ function AuthField({
   secureTextEntry,
   keyboardType,
   autoCapitalize,
-  rightAccessory,
-}: AuthFieldProps): React.JSX.Element {
+}: LoginFieldProps): React.JSX.Element {
   return (
-    <View style={styles.fieldShell}>
-      <View style={styles.fieldIconWrap}>
-        <FieldIcon icon={icon} />
-      </View>
-      <View style={styles.fieldTextWrap}>
-        <Text style={styles.fieldLabel}>{label}</Text>
-        <TextInput
-          style={styles.fieldInput}
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor={colors.textMuted}
-          secureTextEntry={secureTextEntry}
-          keyboardType={keyboardType}
-          autoCapitalize={autoCapitalize}
-          selectionColor={colors.primary}
-        />
-      </View>
-      {rightAccessory ? (
-        <View style={styles.fieldRightAccessory}>{rightAccessory}</View>
-      ) : null}
+    <View style={styles.fieldCard}>
+      <Text style={styles.fieldLabel}>{label}</Text>
+      <TextInput
+        style={styles.fieldInput}
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        placeholderTextColor="#C1C4CC"
+        secureTextEntry={secureTextEntry}
+        keyboardType={keyboardType}
+        autoCapitalize={autoCapitalize}
+        selectionColor="#111111"
+      />
     </View>
   );
 }
@@ -108,29 +103,14 @@ function AuthField({
 function LoginScreen({ onRegister }: LoginScreenProps): React.JSX.Element {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = () => {
     if (!email || !password) {
       Alert.alert("Error", "Please enter email and password");
       return;
     }
-    // TODO: Implement login logic
+
     Alert.alert("Login", "Login functionality to be implemented");
-  };
-
-  const handleForgotPassword = () => {
-    // TODO: Navigate to forgot password screen
-    Alert.alert(
-      "Forgot Password",
-      "Forgot password functionality to be implemented"
-    );
-  };
-
-  const handleGoogleLogin = () => {
-    // TODO: Implement Google login
-    Alert.alert("Google Login", "Google login functionality to be implemented");
   };
 
   const handleRegister = () => {
@@ -144,91 +124,55 @@ function LoginScreen({ onRegister }: LoginScreenProps): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={SCREEN_BACKGROUND}
+      />
+
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         bounces={false}
       >
-        <View style={styles.shell}>
-          <View style={styles.hero}>
-            <Text style={styles.title}>Welcome!</Text>
-            <Text style={styles.subtitle}>Please sign in to your account.</Text>
-            <Image
-              source={images.loginIcon}
-              style={styles.illustration}
-              resizeMode="contain"
-            />
-          </View>
+        <View style={styles.card}>
+          <PatternHeader />
 
-          <View style={styles.form}>
-            <AuthField
-              icon="mail"
-              label="Email Address"
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Enter your email"
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            <AuthField
-              icon="lock"
-              label="Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              placeholder="Enter your password"
-              rightAccessory={
-                <Pressable
-                  onPress={() => setShowPassword((current) => !current)}
-                  hitSlop={10}
-                >
-                  <EyeIcon />
-                </Pressable>
-              }
-            />
+          <View style={styles.content}>
+            <Text style={styles.title}>Login</Text>
 
-            <View style={styles.optionsRow}>
-              <Pressable
-                style={styles.rememberRow}
-                onPress={() => setRememberMe((current) => !current)}
-              >
-                <View
-                  style={[
-                    styles.checkbox,
-                    rememberMe && styles.checkboxSelected,
-                  ]}
-                >
-                  {rememberMe ? <View style={styles.checkboxDot} /> : null}
-                </View>
-                <Text style={styles.rememberText}>Remember Me</Text>
-              </Pressable>
+            <View style={styles.formGroup}>
+              <LoginField
+                label="Email"
+                value={email}
+                onChangeText={setEmail}
+                placeholder="hello@reallygreatsite.com"
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
 
-              <Pressable onPress={handleForgotPassword}>
-                <Text style={styles.forgotText}>Forgot Password?</Text>
-              </Pressable>
+              <LoginField
+                label="Password"
+                value={password}
+                onChangeText={setPassword}
+                placeholder="........"
+                secureTextEntry
+              />
             </View>
 
-            <CustomButton
-              title="Login"
+            <Pressable
+              style={({ pressed }) => [
+                styles.loginButton,
+                pressed ? styles.loginButtonPressed : null,
+              ]}
               onPress={handleLogin}
-              style={styles.loginButton}
-            />
-
-            <View style={styles.divider}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>Or</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            <Pressable style={styles.googleButton} onPress={handleGoogleLogin}>
-              <Text style={styles.googleIconText}>G</Text>
-              <Text style={styles.googleButtonText}>Login with Google</Text>
+            >
+              <Text style={styles.loginButtonText}>Login</Text>
             </Pressable>
 
-            <View style={styles.registerContainer}>
-              <Text style={styles.registerText}>Don't have an account? </Text>
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Don't have any account? </Text>
               <Pressable onPress={handleRegister}>
-                <Text style={styles.registerLink}>Sign Up</Text>
+                <Text style={styles.footerLink}>Sign Up</Text>
               </Pressable>
             </View>
           </View>
@@ -241,282 +185,155 @@ function LoginScreen({ onRegister }: LoginScreenProps): React.JSX.Element {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.authBackground,
+    // backgroundColor: SCREEN_BACKGROUND,
+    backgroundColor: "#FFFFF",
   },
   scrollContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-    paddingHorizontal: 26,
-    paddingVertical: 24,
   },
-  shell: {
-    alignItems: "center",
-    alignSelf: "center",
-    backgroundColor: colors.white,
-    borderColor: colors.panelBorder,
-    borderRadius: 34,
-    borderWidth: 6,
-    elevation: 12,
-    maxWidth: 350,
-    paddingBottom: 30,
-    paddingHorizontal: 22,
-    paddingTop: 28,
-    shadowColor: colors.shadow,
+  card: {
+    backgroundColor: colors.surface,
+    borderRadius: 38,
+    elevation: 8,
+    overflow: "hidden",
+    shadowColor: "#6B7280",
     shadowOffset: {
       width: 0,
-      height: 16,
+      height: 18,
     },
-    shadowOpacity: 0.26,
+    shadowOpacity: 0.16,
     shadowRadius: 24,
     width: "100%",
   },
-  hero: {
+  header: {
     alignItems: "center",
-    marginBottom: 18,
-    width: "100%",
+    backgroundColor: "#111111",
+    height: 190,
+    overflow: "hidden",
+    paddingTop: 60,
+    position: "relative",
   },
-  title: {
-    color: colors.textPrimary,
-    fontSize: 25,
-    fontWeight: "800",
-    marginBottom: 8,
-    textAlign: "center",
+  headerShape: {
+    backgroundColor: "#1E1E1E",
+    opacity: 0.95,
+    position: "absolute",
   },
-  subtitle: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  illustration: {
-    height: 150,
-    marginBottom: 6,
-    width: "100%",
-  },
-  form: {
-    width: "100%",
-  },
-  fieldShell: {
+  logoBadge: {
     alignItems: "center",
     backgroundColor: colors.surface,
-    borderColor: colors.inputBorder,
-    borderRadius: 10,
-    borderWidth: 1,
-    flexDirection: "row",
-    marginBottom: 14,
-    minHeight: 58,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    shadowColor: "#C8D4EC",
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
+    borderRadius: 14,
+    height: 58,
+    justifyContent: "center",
+    width: 58,
   },
-  fieldIconWrap: {
-    alignItems: "center",
+  logoMark: {
     height: 28,
-    justifyContent: "center",
-    width: 24,
-  },
-  fieldTextWrap: {
-    flex: 1,
-    marginLeft: 10,
-  },
-  fieldLabel: {
-    color: "#6E7B95",
-    fontSize: 11,
-    fontWeight: "700",
-    marginBottom: 2,
-  },
-  fieldInput: {
-    color: colors.textPrimary,
-    fontSize: 14,
-    minHeight: 18,
-    paddingVertical: 0,
-  },
-  fieldRightAccessory: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: 10,
-  },
-  mailIcon: {
-    borderColor: "#8C98B3",
-    borderRadius: 3,
-    borderWidth: 1.5,
-    height: 14,
     position: "relative",
-    width: 18,
+    width: 28,
   },
-  mailIconFlapLeft: {
-    backgroundColor: "#8C98B3",
-    height: 1.5,
-    left: 1,
+  logoCircle: {
+    backgroundColor: "#111111",
+    borderRadius: 14,
+    height: 28,
     position: "absolute",
-    top: 5,
-    transform: [{ rotate: "28deg" }],
-    width: 9,
+    right: 0,
+    top: 0,
+    width: 28,
   },
-  mailIconFlapRight: {
-    backgroundColor: "#8C98B3",
-    height: 1.5,
+  logoCut: {
+    backgroundColor: colors.surface,
+    height: 28,
+    left: 0,
     position: "absolute",
-    right: 1,
-    top: 5,
-    transform: [{ rotate: "-28deg" }],
-    width: 9,
-  },
-  lockIcon: {
-    alignItems: "center",
-    height: 18,
-    justifyContent: "flex-end",
-    width: 16,
-  },
-  lockShackle: {
-    borderColor: "#8C98B3",
-    borderRadius: 6,
-    borderWidth: 1.5,
-    height: 8,
+    top: 0,
     width: 10,
   },
-  lockBody: {
-    alignItems: "center",
-    backgroundColor: "#8C98B3",
-    borderRadius: 3,
-    height: 10,
-    justifyContent: "center",
-    marginTop: -2,
-    width: 14,
-  },
-  lockKeyhole: {
+  content: {
     backgroundColor: colors.surface,
-    borderRadius: 2,
-    height: 4,
-    width: 3,
+    borderTopLeftRadius: 100,
+    borderTopRightRadius: 20,
+    marginTop: -50,
+    // minHeight: 382,
+    // paddingBottom: 28,
+    paddingHorizontal: 24,
+    paddingTop: 38,
+    height: "100%",
+    width:'100%',
   },
-  eyeIcon: {
-    alignItems: "center",
-    borderColor: "#97A3BD",
-    borderRadius: 12,
-    borderWidth: 1.4,
-    height: 12,
-    justifyContent: "center",
-    transform: [{ scaleY: 0.8 }],
-    width: 18,
+  title: {
+    color: "#1F1F1F",
+    fontSize: 22,
+    fontWeight: "700",
+    marginBottom: 34,
+    textAlign: "center",
   },
-  eyePupil: {
-    backgroundColor: "#97A3BD",
-    borderRadius: 2,
-    height: 4,
-    width: 4,
+  formGroup: {
+    gap: 14,
   },
-  optionsRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
-    marginTop: 2,
-  },
-  rememberRow: {
-    alignItems: "center",
-    flexDirection: "row",
-  },
-  checkbox: {
-    alignItems: "center",
+  fieldCard: {
     backgroundColor: colors.surface,
-    borderColor: colors.inputBorder,
-    borderRadius: 5,
-    borderWidth: 1.4,
-    height: 18,
-    justifyContent: "center",
-    marginRight: 8,
-    width: 18,
-  },
-  checkboxSelected: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  checkboxDot: {
-    backgroundColor: colors.white,
-    borderRadius: 3,
-    height: 7,
-    width: 7,
-  },
-  rememberText: {
-    color: colors.textSecondary,
-    fontSize: 14,
-  },
-  forgotText: {
-    color: colors.primary,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  loginButton: {
-    marginBottom: 18,
-  },
-  divider: {
-    alignItems: "center",
-    flexDirection: "row",
-    marginBottom: 16,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: colors.border,
-  },
-  dividerText: {
-    color: colors.textSecondary,
-    fontSize: 15,
-    fontWeight: "600",
-    marginHorizontal: 12,
-  },
-  googleButton: {
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderColor: colors.inputBorder,
-    borderRadius: 10,
+    borderColor: "#F4F4F5",
+    borderRadius: 16,
     borderWidth: 1,
-    flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 18,
-    paddingVertical: 14,
-    shadowColor: "#CAD4EA",
+    elevation: 3,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    shadowColor: "#D4D9E2",
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 8,
     },
-    shadowOpacity: 0.24,
-    shadowRadius: 10,
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
   },
-  googleIconText: {
-    color: colors.googleBlue,
-    fontSize: 26,
-    fontWeight: "700",
-    marginRight: 10,
+  fieldLabel: {
+    color: "#1F1F1F",
+    fontSize: 12,
+    fontWeight: "600",
+    marginBottom: 6,
   },
-  googleButtonText: {
-    color: colors.textPrimary,
-    fontSize: 17,
+  fieldInput: {
+    color: "#1F1F1F",
+    fontSize: 14,
+    paddingVertical: 0,
+  },
+  loginButton: {
+    alignItems: "center",
+    backgroundColor: "#050505",
+    borderRadius: 10,
+    elevation: 4,
+    marginTop: 22,
+    paddingVertical: 14,
+    shadowColor: "#111111",
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+  },
+  loginButtonPressed: {
+    opacity: 0.94,
+    transform: [{ scale: 0.995 }],
+  },
+  loginButtonText: {
+    color: colors.surface,
+    fontSize: 15,
     fontWeight: "600",
   },
-  registerContainer: {
+  footer: {
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 4,
+    marginTop: 110,
   },
-  registerText: {
-    color: colors.textSecondary,
-    fontSize: 15,
+  footerText: {
+    color: "#4B5563",
+    fontSize: 13,
   },
-  registerLink: {
-    color: colors.primary,
-    fontSize: 15,
+  footerLink: {
+    color: "#111111",
+    fontSize: 13,
     fontWeight: "700",
-    textDecorationLine: "underline",
   },
 });
 
