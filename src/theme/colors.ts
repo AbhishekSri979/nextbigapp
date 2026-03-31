@@ -11,7 +11,7 @@ export const colors = {
   panelBorder: "#FFFFFF",
   border: "#D7DFEA",
   inputBorder: "#D6DEEF",
-  primary: "#2F78F5",
+  primary:"#008080", //"#2F78F5",
   primaryDark: "#255ECF",
   textPrimary: "#2F3754",
   textSecondary: "#7A869E",

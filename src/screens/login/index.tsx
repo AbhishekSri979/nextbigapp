@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   Alert,
+  Image,
   Pressable,
   ScrollView,
   StatusBar,
@@ -13,6 +14,7 @@ import type { TextInputProps } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { colors } from "../../theme/colors";
+import { images } from "../../theme/images";
 
 type LoginScreenProps = {
   onRegister?: () => void;
@@ -28,40 +30,64 @@ type LoginFieldProps = {
   autoCapitalize?: TextInputProps["autoCapitalize"];
 };
 
-const HEADER_PATTERN = [
-  { top: -14, left: -10, size: 62, radius: 22, rotate: "45deg" },
-  { top: 2, left: 42, size: 70, radius: 35, rotate: "0deg" },
-  { top: -18, left: 114, size: 60, radius: 18, rotate: "45deg" },
-  { top: 8, left: 166, size: 74, radius: 37, rotate: "0deg" },
-  { top: -12, left: 238, size: 58, radius: 18, rotate: "45deg" },
-  { top: 58, left: -18, size: 72, radius: 36, rotate: "0deg" },
-  { top: 72, left: 38, size: 58, radius: 18, rotate: "45deg" },
-  { top: 66, left: 92, size: 74, radius: 36, rotate: "0deg" },
-  { top: 74, left: 168, size: 64, radius: 20, rotate: "45deg" },
-  { top: 60, left: 222, size: 78, radius: 39, rotate: "0deg" },
-] as const;
+type SocialProvider = {
+  key: string;
+  label: string;
+  icon: number;
+};
 
-const SCREEN_BACKGROUND = colors.white;
+function hexToRgba(hexColor: string, opacity: number): string {
+  const normalizedHex = hexColor.replace("#", "");
+  const sixDigitHex =
+    normalizedHex.length === 3
+      ? normalizedHex
+          .split("")
+          .map((character) => `${character}${character}`)
+          .join("")
+      : normalizedHex;
+
+  const red = Number.parseInt(sixDigitHex.slice(0, 2), 16);
+  const green = Number.parseInt(sixDigitHex.slice(2, 4), 16);
+  const blue = Number.parseInt(sixDigitHex.slice(4, 6), 16);
+
+  return `rgba(${red}, ${green}, ${blue}, ${opacity})`;
+}
+
+const SCREEN_BACKGROUND = colors.background;
+const HEADER_GLOW = hexToRgba(colors.white, 0.15);
+const HEADER_SOFT_LIGHT = hexToRgba(colors.white, 0.1);
+const HEADER_DARK_ACCENT = "rgba(0, 0, 0, 0.08)";
+const SOCIAL_PROVIDERS: SocialProvider[] = [
+  {
+    key: "google",
+    label: "Google",
+    icon: images.google,
+  },
+  {
+    key: "facebook",
+    label: "Facebook",
+    icon: images.facebook,
+  },
+  {
+    key: "linkedin",
+    label: "LinkedIn",
+    icon: images.linkedin,
+  },
+];
 
 function PatternHeader(): React.JSX.Element {
   return (
     <View style={styles.header}>
-      {HEADER_PATTERN.map((shape, index) => (
-        <View
-          key={`shape-${index}`}
-          style={[
-            styles.headerShape,
-            {
-              top: shape.top,
-              left: shape.left,
-              width: shape.size,
-              height: shape.size,
-              borderRadius: shape.radius,
-              transform: [{ rotate: shape.rotate }],
-            },
-          ]}
-        />
-      ))}
+      <View style={styles.headerOrbLarge} />
+      <View style={styles.headerOrbSmall} />
+      <View style={styles.headerRibbon} />
+      <View style={styles.headerArc} />
+      <View style={styles.headerDotRow}>
+        <View style={styles.headerDot} />
+        <View style={styles.headerDot} />
+        <View style={styles.headerDot} />
+      </View>
+      <View style={styles.logoAura} />
 
       <View style={styles.logoBadge}>
         <View style={styles.logoMark}>
@@ -100,6 +126,32 @@ function LoginField({
   );
 }
 
+function SocialLoginButton({
+  provider,
+  onPress,
+}: {
+  provider: SocialProvider;
+  onPress: () => void;
+}): React.JSX.Element {
+  return (
+    <Pressable
+      style={({ pressed }) => [
+        styles.socialButton,
+        pressed ? styles.socialButtonPressed : null,
+      ]}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`Continue with ${provider.label}`}
+    >
+      <Image
+        source={provider.icon}
+        style={styles.socialIconImage}
+        resizeMode="contain"
+      />
+    </Pressable>
+  );
+}
+
 function LoginScreen({ onRegister }: LoginScreenProps): React.JSX.Element {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -122,11 +174,18 @@ function LoginScreen({ onRegister }: LoginScreenProps): React.JSX.Element {
     Alert.alert("Register", "Register functionality to be implemented");
   };
 
+  const handleSocialLogin = (provider: string) => {
+    Alert.alert(
+      `${provider} Login`,
+      `${provider} login functionality to be implemented`
+    );
+  };
+
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={["left", "right", "bottom"]}>
       <StatusBar
         barStyle="light-content"
-        backgroundColor={SCREEN_BACKGROUND}
+        backgroundColor={colors.primary}
       />
 
       <ScrollView
@@ -169,6 +228,24 @@ function LoginScreen({ onRegister }: LoginScreenProps): React.JSX.Element {
               <Text style={styles.loginButtonText}>Login</Text>
             </Pressable>
 
+            <View style={styles.socialSection}>
+              <View style={styles.socialDivider}>
+                <View style={styles.socialDividerLine} />
+                <Text style={styles.socialDividerText}>Or continue with</Text>
+                <View style={styles.socialDividerLine} />
+              </View>
+
+              <View style={styles.socialButtons}>
+                {SOCIAL_PROVIDERS.map((provider) => (
+                  <SocialLoginButton
+                    key={provider.key}
+                    provider={provider}
+                    onPress={() => handleSocialLogin(provider.label)}
+                  />
+                ))}
+              </View>
+            </View>
+
             <View style={styles.footer}>
               <Text style={styles.footerText}>Don't have any account? </Text>
               <Pressable onPress={handleRegister}>
@@ -185,44 +262,100 @@ function LoginScreen({ onRegister }: LoginScreenProps): React.JSX.Element {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    // backgroundColor: SCREEN_BACKGROUND,
-    backgroundColor: "#FFFFF",
+    backgroundColor: colors.surface,
   },
   scrollContent: {
+    flexGrow: 1,
   },
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: 38,
-    elevation: 8,
-    overflow: "hidden",
-    shadowColor: "#6B7280",
-    shadowOffset: {
-      width: 0,
-      height: 18,
-    },
-    shadowOpacity: 0.16,
-    shadowRadius: 24,
+    backgroundColor: colors.primary,
+    flex: 1,
     width: "100%",
   },
   header: {
     alignItems: "center",
-    backgroundColor: "#111111",
+    backgroundColor: colors.primary,
     height: 190,
     overflow: "hidden",
-    paddingTop: 60,
+    paddingTop: 87,
     position: "relative",
   },
-  headerShape: {
-    backgroundColor: "#1E1E1E",
-    opacity: 0.95,
+  headerOrbLarge: {
+    backgroundColor: HEADER_GLOW,
+    borderRadius: 110,
+    height: 220,
+    left: -56,
     position: "absolute",
+    top: -76,
+    width: 220,
+  },
+  headerOrbSmall: {
+    backgroundColor: HEADER_DARK_ACCENT,
+    borderRadius: 76,
+    height: 152,
+    position: "absolute",
+    right: -24,
+    top: 26,
+    width: 152,
+  },
+  headerRibbon: {
+    backgroundColor: HEADER_SOFT_LIGHT,
+    borderRadius: 40,
+    height: 88,
+    position: "absolute",
+    right: -40,
+    top: 44,
+    transform: [{ rotate: "-18deg" }],
+    width: 220,
+  },
+  headerArc: {
+    borderColor: HEADER_SOFT_LIGHT,
+    borderRadius: 82,
+    borderWidth: 18,
+    height: 164,
+    left: -34,
+    position: "absolute",
+    top: 58,
+    width: 164,
+  },
+  headerDotRow: {
+    flexDirection: "row",
+    gap: 8,
+    position: "absolute",
+    right: 26,
+    top: 28,
+  },
+  headerDot: {
+    backgroundColor: hexToRgba(colors.white, 0.5),
+    borderRadius: 4,
+    height: 8,
+    width: 8,
+  },
+  logoAura: {
+    backgroundColor: HEADER_SOFT_LIGHT,
+    borderRadius: 46,
+    height: 92,
+    left: "50%",
+    marginLeft: -46,
+    position: "absolute",
+    top: 70,
+    width: 92,
   },
   logoBadge: {
     alignItems: "center",
     backgroundColor: colors.surface,
+    borderColor: hexToRgba(colors.white, 0.35),
     borderRadius: 14,
+    borderWidth: 1,
     height: 58,
     justifyContent: "center",
+    shadowColor: "#0C4A4A",
+    shadowOffset: {
+      width: 0,
+      height: 12,
+    },
+    shadowOpacity: 0.16,
+    shadowRadius: 18,
     width: 58,
   },
   logoMark: {
@@ -231,7 +364,7 @@ const styles = StyleSheet.create({
     width: 28,
   },
   logoCircle: {
-    backgroundColor: "#111111",
+    backgroundColor: colors.primary,
     borderRadius: 14,
     height: 28,
     position: "absolute",
@@ -249,15 +382,11 @@ const styles = StyleSheet.create({
   },
   content: {
     backgroundColor: colors.surface,
-    borderTopLeftRadius: 100,
-    borderTopRightRadius: 20,
-    marginTop: -50,
-    // minHeight: 382,
-    // paddingBottom: 28,
+    borderTopLeftRadius: 60,
+    flex: 1,
+    paddingBottom: 28,
     paddingHorizontal: 24,
     paddingTop: 38,
-    height: "100%",
-    width:'100%',
   },
   title: {
     color: "#1F1F1F",
@@ -298,7 +427,7 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     alignItems: "center",
-    backgroundColor: "#050505",
+    backgroundColor: colors.primary,
     borderRadius: 10,
     elevation: 4,
     marginTop: 22,
@@ -320,11 +449,61 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
   },
+  socialSection: {
+    marginTop: 26,
+  },
+  socialDivider: {
+    alignItems: "center",
+    flexDirection: "row",
+    marginBottom: 18,
+  },
+  socialDividerLine: {
+    backgroundColor: "#E7EAF0",
+    flex: 1,
+    height: 1,
+  },
+  socialDividerText: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontWeight: "600",
+    marginHorizontal: 12,
+  },
+  socialButtons: {
+    flexDirection: "row",
+    gap: 16,
+    justifyContent: "center",
+  },
+  socialButton: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: "#E9EDF4",
+    borderRadius: 18,
+    borderWidth: 1,
+    elevation: 3,
+    height: 58,
+    justifyContent: "center",
+    shadowColor: "#CBD4E3",
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.14,
+    shadowRadius: 14,
+    width: 58,
+  },
+  socialButtonPressed: {
+    opacity: 0.96,
+    transform: [{ scale: 0.995 }],
+  },
+  socialIconImage: {
+    height: 24,
+    width: 24,
+  },
   footer: {
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 110,
+    marginTop: 40,
   },
   footerText: {
     color: "#4B5563",
