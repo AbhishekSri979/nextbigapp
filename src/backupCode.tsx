@@ -12,9 +12,9 @@ import {
 import type { TextInputProps } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { CustomButton } from "../../components/common";
-import { colors } from "../../theme/colors";
-import { images } from "../../theme/images";
+import { CustomButton } from "./components/common";
+import { colors } from "./theme/colors";
+import { images } from "./theme/images";
 
 type AuthFieldProps = {
   icon: "mail" | "lock";
