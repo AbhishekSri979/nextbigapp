@@ -12,6 +12,7 @@ vendor/bundle/
 # Build outputs
 android/app/build/
 android/build/
+android/.gradle/
 ios/build/
 
 # Logs

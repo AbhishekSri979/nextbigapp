@@ -1,8 +1,8 @@
 import React from 'react';
 import { StatusBar,View } from 'react-native';
 
-import HomeScreen from '../screens/home/HomeScreen';
 import { colors } from '../theme/colors';
+import LoginScreen from '../screens/login';
 
 function App(): React.JSX.Element {
   return (
@@ -11,7 +11,7 @@ function App(): React.JSX.Element {
         barStyle="dark-content"
         backgroundColor={colors.background}
       />
-      <HomeScreen />
+      <LoginScreen/>
     </View>
   );
 }
