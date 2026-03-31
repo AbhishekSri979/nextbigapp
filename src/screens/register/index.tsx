@@ -191,6 +191,15 @@ function EyeIcon(): React.JSX.Element {
   );
 }
 
+function InfoIcon(): React.JSX.Element {
+  return (
+    <View style={styles.infoIcon}>
+      <View style={styles.infoIconDot} />
+      <View style={styles.infoIconStem} />
+    </View>
+  );
+}
+
 function FieldIcon({ icon }: { icon: FormFieldIcon }): React.JSX.Element {
   switch (icon) {
     case "person":
@@ -319,6 +328,7 @@ function RegisterScreen({
   const [calendarMonth, setCalendarMonth] = useState<Date>(startOfMonth(today));
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPasswordTooltip, setShowPasswordTooltip] = useState(false);
 
   const calendarDays = buildCalendarDays(calendarMonth, today);
   const canGoToNextMonth =
@@ -447,15 +457,31 @@ function RegisterScreen({
               placeholder="Enter your password"
               secureTextEntry={!showPassword}
               rightAccessory={
-                <Pressable
-                  onPress={() => setShowPassword((current) => !current)}
-                  hitSlop={10}
-                >
-                  <EyeIcon />
-                </Pressable>
+                <View style={styles.passwordAccessoryRow}>
+                  <Pressable
+                    onPress={() =>
+                      setShowPasswordTooltip((current) => !current)
+                    }
+                    hitSlop={10}
+                    style={styles.accessoryButton}
+                  >
+                    <InfoIcon />
+                  </Pressable>
+                  <Pressable
+                    onPress={() => setShowPassword((current) => !current)}
+                    hitSlop={10}
+                    style={styles.accessoryButton}
+                  >
+                    <EyeIcon />
+                  </Pressable>
+                </View>
               }
               error={formErrors.password}
-              helperText="Use at least 8 characters with 1 number and 1 special character."
+              helperText={
+                showPasswordTooltip
+                  ? "Password rules: minimum 8 characters, at least 1 number, and 1 special character."
+                  : undefined
+              }
             />
 
             <AuthField
@@ -700,12 +726,24 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginLeft: 10,
   },
+  passwordAccessoryRow: {
+    alignItems: "center",
+    flexDirection: "row",
+  },
+  accessoryButton: {
+    marginLeft: 8,
+  },
   helperText: {
+    backgroundColor: colors.panelSurface,
+    borderColor: colors.inputBorder,
+    borderRadius: 10,
+    borderWidth: 1,
     color: colors.textSecondary,
     fontSize: 12,
     lineHeight: 17,
     marginTop: 6,
-    paddingHorizontal: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
   errorText: {
     color: "#D64545",
@@ -985,6 +1023,28 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     height: 4,
     width: 4,
+  },
+  infoIcon: {
+    alignItems: "center",
+    borderColor: "#97A3BD",
+    borderRadius: 9,
+    borderWidth: 1.4,
+    height: 18,
+    justifyContent: "center",
+    width: 18,
+  },
+  infoIconDot: {
+    backgroundColor: "#97A3BD",
+    borderRadius: 1.5,
+    height: 3,
+    marginBottom: 1,
+    width: 3,
+  },
+  infoIconStem: {
+    backgroundColor: "#97A3BD",
+    borderRadius: 1,
+    height: 6,
+    width: 2,
   },
 });
 
