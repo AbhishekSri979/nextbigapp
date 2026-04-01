@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import type { TextInputProps } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
   AppLoader,
@@ -82,6 +83,7 @@ function hexToRgba(hexColor: string, opacity: number): string {
 const HEADER_GLOW = hexToRgba(colors.white, 0.15);
 const HEADER_SOFT_LIGHT = hexToRgba(colors.white, 0.1);
 const HEADER_DARK_ACCENT = "rgba(0, 0, 0, 0.08)";
+const REMEMBERED_LOGIN_KEY = "@eventGearApp/rememberedLogin";
 const SOCIAL_PROVIDERS: SocialProvider[] = [
   {
     key: "google",
@@ -233,6 +235,80 @@ function LoginScreen(): React.JSX.Element {
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formErrors, setFormErrors] = useState<LoginErrors>({});
+  const [hasLoadedRememberedCredentials, setHasLoadedRememberedCredentials] =
+    useState(false);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadRememberedCredentials = async () => {
+      try {
+        const storedCredentials = await AsyncStorage.getItem(
+          REMEMBERED_LOGIN_KEY
+        );
+
+        if (!storedCredentials) {
+          return;
+        }
+
+        const parsedCredentials = JSON.parse(storedCredentials) as
+          | Partial<LoginValues>
+          | null;
+
+        if (!isActive) {
+          return;
+        }
+
+        if (parsedCredentials?.email && parsedCredentials?.password) {
+          setEmail(parsedCredentials.email);
+          setPassword(parsedCredentials.password);
+          setRememberMe(true);
+          return;
+        }
+
+        await AsyncStorage.removeItem(REMEMBERED_LOGIN_KEY);
+      } catch (error) {
+        console.warn("Unable to load remembered login details.", error);
+      } finally {
+        if (isActive) {
+          setHasLoadedRememberedCredentials(true);
+        }
+      }
+    };
+
+    loadRememberedCredentials();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoadedRememberedCredentials) {
+      return;
+    }
+
+    const syncRememberedCredentials = async () => {
+      try {
+        if (!rememberMe) {
+          await AsyncStorage.removeItem(REMEMBERED_LOGIN_KEY);
+          return;
+        }
+
+        await AsyncStorage.setItem(
+          REMEMBERED_LOGIN_KEY,
+          JSON.stringify({
+            email: email.trim(),
+            password,
+          })
+        );
+      } catch (error) {
+        console.warn("Unable to update remembered login details.", error);
+      }
+    };
+
+    syncRememberedCredentials();
+  }, [email, hasLoadedRememberedCredentials, password, rememberMe]);
 
   useEffect(() => {
     const rootNavigation = navigation.getParent<RootNavigationProp>();
