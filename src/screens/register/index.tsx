@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import type { TextInputProps } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
 
 import {
   AppLoader,
@@ -28,10 +29,7 @@ import {
   resetCreateUserAccountStateAction,
 } from "../../store/modules/users/actions";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
-
-type RegisterScreenProps = {
-  onLogin?: () => void;
-};
+import type { AuthNavigationProp } from "../../navigation";
 
 type FormValues = {
   fullName: string;
@@ -284,9 +282,8 @@ function RegisterField({
   );
 }
 
-function RegisterScreen({
-  onLogin,
-}: RegisterScreenProps): React.JSX.Element {
+function RegisterScreen(): React.JSX.Element {
+  const navigation = useNavigation<AuthNavigationProp<"Register">>();
   const dispatch = useAppDispatch();
   const {
     loading: isRegistrationLoading,
@@ -388,14 +385,14 @@ function RegisterScreen({
   };
 
   const handleLogin = () => {
-    if (onLogin) {
-      onLogin();
+    if (navigation.canGoBack()) {
+      navigation.goBack();
       return;
     }
 
-    showErrorToast({
-      title: "Navigation unavailable",
-      message: "Login screen navigation is not connected yet.",
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "Login" }],
     });
   };
 

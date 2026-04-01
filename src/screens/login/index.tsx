@@ -17,16 +17,16 @@ import {
   LockIcon,
   MailIcon,
   showErrorToast,
+  showSuccessToast,
 } from "../../components/common";
 import { colors } from "../../theme/colors";
 import { images } from "../../theme/images";
 import { styles } from "./styles";
-import { useDispatch } from "react-redux";
-
-type LoginScreenProps = {
-  onRegister?: () => void;
-  onForgotPassword?: () => void;
-};
+import { useNavigation } from "@react-navigation/native";
+import type {
+  AuthNavigationProp,
+  RootNavigationProp,
+} from "../../navigation";
 
 type LoginFieldProps = {
   icon: "mail" | "lock";
@@ -213,11 +213,8 @@ function getValidationErrors(values: LoginValues): LoginErrors {
   return nextErrors;
 }
 
-function LoginScreen({
-  onRegister,
-  onForgotPassword,
-}: LoginScreenProps): React.JSX.Element {
-  const dispatch=useDispatch()
+function LoginScreen(): React.JSX.Element {
+  const navigation = useNavigation<AuthNavigationProp<"Login">>();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -246,6 +243,7 @@ function LoginScreen({
 
   const handleLogin = () => {
     const nextErrors = getValidationErrors({ email, password });
+    const rootNavigation = navigation.getParent<RootNavigationProp>();
 
     setFormErrors(nextErrors);
 
@@ -257,34 +255,31 @@ function LoginScreen({
       return;
     }
 
-    showErrorToast({
-      title: "Login unavailable",
-      message: "Login functionality is not available yet.",
+    showSuccessToast({
+      title: "Login successful",
+      message: "Welcome back to EventGear.",
     });
-  };
 
-  const handleForgotPassword = () => {
-    if (onForgotPassword) {
-      onForgotPassword();
-      return;
-    }
-
-    showErrorToast({
-      title: "Forgot password unavailable",
-      message: "Password reset functionality is not connected yet.",
-    });
-  };
-
-  const handleRegister = () => {
-    if (onRegister) {
-      onRegister();
+    if (rootNavigation) {
+      rootNavigation.reset({
+        index: 0,
+        routes: [{ name: "AppStack" }],
+      });
       return;
     }
 
     showErrorToast({
       title: "Navigation unavailable",
-      message: "Register screen navigation is not connected yet.",
+      message: "App stack navigation is not connected yet.",
     });
+  };
+
+  const handleForgotPassword = () => {
+    navigation.navigate("ForgotPassword");
+  };
+
+  const handleRegister = () => {
+    navigation.navigate("Register");
   };
 
   const handleSocialLogin = (provider: string) => {
