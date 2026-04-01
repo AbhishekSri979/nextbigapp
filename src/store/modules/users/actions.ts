@@ -1,6 +1,12 @@
 import { ApIConstant } from './actionTypes';
 
-export const createUserAccountRequestAction = (payload: unknown) => ({
+export const createUserAccountRequestAction = (
+  requestData: unknown,
+  key?: string,
+) => ({
   type: ApIConstant.API_CREATE_USER_ACCOUNT_LOAD,
-  payload,
+  payload: {
+    requestData,
+    key,
+  },
 });

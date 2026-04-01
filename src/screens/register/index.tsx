@@ -30,7 +30,7 @@ type RegisterScreenProps = {
 
 type FormValues = {
   fullName: string;
-  dob: Date | null;
+  dob: string;
   mobile: string;
   email: string;
   password: string;
@@ -123,6 +123,12 @@ function isSameDay(firstDate: Date | null, secondDate: Date): boolean {
 function formatDate(date: Date): string {
   return `${date.getDate().toString().padStart(2, "0")} ${MONTH_NAMES[date.getMonth()]
     } ${date.getFullYear()}`;
+}
+
+function formatDateForRequest(date: Date): string {
+  return `${date.getFullYear()}-${(date.getMonth() + 1)
+    .toString()
+    .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
 }
 
 function buildCalendarDays(month: Date, today: Date): CalendarDay[] {
@@ -271,12 +277,13 @@ function RegisterScreen({
   const today = startOfDay(new Date());
   const [formValues, setFormValues] = useState<FormValues>({
     fullName: "",
-    dob: null,
+    dob: "",
     mobile: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
+  const [selectedDob, setSelectedDob] = useState<Date | null>(null);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [isCalendarVisible, setCalendarVisible] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState<Date>(startOfMonth(today));
@@ -285,7 +292,7 @@ function RegisterScreen({
   const [showPasswordTooltip, setShowPasswordTooltip] = useState(false);
   const calendarDays = buildCalendarDays(calendarMonth, today);
   const canGoToNextMonth =
-    addMonths(calendarMonth, 1).getTime() <= startOfMonth(today).getTime();
+    addMonths(calendarMonth, 1).getTime() <= startOfMonth(today).getTime();    
 
   const updateField = <Key extends keyof FormValues,>(
     field: Key,
@@ -310,12 +317,15 @@ function RegisterScreen({
   };
 
   const handleSelectDate = (selectedDate: Date) => {
-    updateField("dob", selectedDate);
+    const normalizedDate = startOfDay(selectedDate);
+
+    setSelectedDob(normalizedDate);
+    updateField("dob", formatDateForRequest(normalizedDate));
     setCalendarVisible(false);
   };
 
   const handleOpenCalendar = () => {
-    setCalendarMonth(startOfMonth(formValues.dob ?? today));
+    setCalendarMonth(startOfMonth(selectedDob ?? today));
     setCalendarVisible(true);
   };
 
@@ -370,7 +380,7 @@ function RegisterScreen({
 
               <RegisterField
                 label="Date of Birth"
-                value={formValues.dob ? formatDate(formValues.dob) : ""}
+                value={selectedDob ? formatDate(selectedDob) : ""}
                 placeholder="Select your date of birth"
                 onPress={handleOpenCalendar}
                 rightAccessory={<ChevronDownIcon />}
@@ -527,7 +537,7 @@ function RegisterScreen({
 
             <View style={styles.calendarGrid}>
               {calendarDays.map((day) => {
-                const isSelected = isSameDay(formValues.dob, day.date);
+                const isSelected = isSameDay(selectedDob, day.date);
 
                 return (
                   <Pressable
