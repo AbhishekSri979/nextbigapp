@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   Pressable,
@@ -12,6 +12,7 @@ import type { TextInputProps } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
+  AppLoader,
   CustomButton,
   EyeIcon,
   LockIcon,
@@ -27,6 +28,11 @@ import type {
   AuthNavigationProp,
   RootNavigationProp,
 } from "../../navigation";
+import {
+  loginRequestAction,
+  resetLoginStateAction,
+} from "../../store/modules/users/actions";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 
 type LoginFieldProps = {
   icon: "mail" | "lock";
@@ -215,11 +221,54 @@ function getValidationErrors(values: LoginValues): LoginErrors {
 
 function LoginScreen(): React.JSX.Element {
   const navigation = useNavigation<AuthNavigationProp<"Login">>();
+  const dispatch = useAppDispatch();
+  const {
+    loading: isLoginLoading,
+    status: loginStatus,
+    error: loginError,
+    message: loginMessage,
+  } = useAppSelector((state) => state.users);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formErrors, setFormErrors] = useState<LoginErrors>({});
+
+  useEffect(() => {
+    const rootNavigation = navigation.getParent<RootNavigationProp>();
+
+    if (loginStatus === "success") {
+      showSuccessToast({
+        title: "Login successful",
+        message: loginMessage ?? "Welcome back to EventGear.",
+      });
+      dispatch(resetLoginStateAction());
+
+      if (rootNavigation) {
+        rootNavigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: "AppStack",
+              params: {
+                screen: "Home",
+              },
+            },
+          ],
+        });
+      }
+
+      return;
+    }
+
+    if (loginStatus === "error") {
+      showErrorToast({
+        title: "Login failed",
+        message: loginError ?? "Please try again.",
+      });
+      dispatch(resetLoginStateAction());
+    }
+  }, [dispatch, loginError, loginMessage, loginStatus, navigation]);
 
   const updateField = (field: keyof LoginValues, value: string) => {
     if (field === "email") {
@@ -243,7 +292,6 @@ function LoginScreen(): React.JSX.Element {
 
   const handleLogin = () => {
     const nextErrors = getValidationErrors({ email, password });
-    const rootNavigation = navigation.getParent<RootNavigationProp>();
 
     setFormErrors(nextErrors);
 
@@ -255,23 +303,12 @@ function LoginScreen(): React.JSX.Element {
       return;
     }
 
-    showSuccessToast({
-      title: "Login successful",
-      message: "Welcome back to EventGear.",
-    });
-
-    if (rootNavigation) {
-      rootNavigation.reset({
-        index: 0,
-        routes: [{ name: "AppStack" }],
-      });
-      return;
-    }
-
-    showErrorToast({
-      title: "Navigation unavailable",
-      message: "App stack navigation is not connected yet.",
-    });
+    dispatch(
+      loginRequestAction({
+        email: email.trim(),
+        password,
+      })
+    );
   };
 
   const handleForgotPassword = () => {
@@ -381,6 +418,7 @@ function LoginScreen(): React.JSX.Element {
             <CustomButton
               title="Login"
               onPress={handleLogin}
+              disabled={isLoginLoading}
               style={styles.loginButton}
             />
 
@@ -411,6 +449,12 @@ function LoginScreen(): React.JSX.Element {
           </View>
         </View>
       </ScrollView>
+
+      <AppLoader
+        visible={isLoginLoading}
+        title="Signing you in..."
+        subtitle="Please wait while we verify your account."
+      />
     </SafeAreaView>
   );
 }

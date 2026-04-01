@@ -8,7 +8,7 @@ const headers = {
 };
 
 export const registrationApi = async (data: unknown) =>
-  Method.POST(`${Users}/Registration`, apiClient, data, headers);
+  Method.POST(`${Users}/registration`, apiClient, data, headers);
 
 export const loginApi = async (data: unknown) =>
-  Method.POST(`${Users}/Login`, apiClient, data, headers);
+  Method.POST(`${Users}/login`, apiClient, data, headers);

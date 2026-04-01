@@ -86,6 +86,7 @@ function usersReducer(
       };
 
     case ApIConstant.API_CREATE_USER_ACCOUNT_RESET:
+    case ApIConstant.API_LOGIN_RESET:
       return {
         ...state,
         loading: false,

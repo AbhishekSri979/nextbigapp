@@ -25,3 +25,7 @@ export const createUserAccountRequestAction = (
 export const resetCreateUserAccountStateAction = () => ({
   type: ApIConstant.API_CREATE_USER_ACCOUNT_RESET,
 });
+
+export const resetLoginStateAction = () => ({
+  type: ApIConstant.API_LOGIN_RESET,
+});

@@ -1,4 +1,7 @@
-import type { NavigationProp } from "@react-navigation/native";
+import type {
+  NavigationProp,
+  NavigatorScreenParams,
+} from "@react-navigation/native";
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -11,8 +14,8 @@ export type AppStackParamList = {
 };
 
 export type RootStackParamList = {
-  AuthStack: undefined;
-  AppStack: undefined;
+  AuthStack: NavigatorScreenParams<AuthStackParamList> | undefined;
+  AppStack: NavigatorScreenParams<AppStackParamList> | undefined;
 };
 
 export type AuthNavigationProp<
