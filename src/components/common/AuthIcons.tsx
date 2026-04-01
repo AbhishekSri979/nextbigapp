@@ -16,9 +16,7 @@ type EyeIconProps = IconProps & {
   surfaceColor?: string;
 };
 
-export function MailIcon({
-  color = "#8C98B3",
-}: IconProps): React.JSX.Element {
+export function MailIcon({ color = "#8C98B3" }: IconProps): React.JSX.Element {
   return (
     <View style={[styles.mailIcon, { borderColor: color }]}>
       <View style={[styles.mailIconFlapLeft, { backgroundColor: color }]} />
@@ -67,9 +65,7 @@ export function EyeIcon({
   );
 }
 
-export function InfoIcon({
-  color = "#97A3BD",
-}: IconProps): React.JSX.Element {
+export function InfoIcon({ color = "#97A3BD" }: IconProps): React.JSX.Element {
   return (
     <View style={[styles.infoIcon, { borderColor: color }]}>
       <View style={[styles.infoIconDot, { backgroundColor: color }]} />
@@ -85,6 +81,18 @@ export function ChevronDownIcon({
     <View style={styles.chevronDown}>
       <View style={[styles.chevronDownLeft, { backgroundColor: color }]} />
       <View style={[styles.chevronDownRight, { backgroundColor: color }]} />
+    </View>
+  );
+}
+
+export function BackArrowIcon({
+  color = colors.primary,
+}: IconProps): React.JSX.Element {
+  return (
+    <View style={styles.backArrow}>
+      <View style={[styles.backArrowBody, { backgroundColor: color }]} />
+      <View style={[styles.backArrowHeadTop, { backgroundColor: color }]} />
+      <View style={[styles.backArrowHeadBottom, { backgroundColor: color }]} />
     </View>
   );
 }
@@ -211,5 +219,36 @@ const styles = StyleSheet.create({
     top: 6,
     transform: [{ rotate: "-38deg" }],
     width: 8,
+  },
+  backArrow: {
+    height: 14,
+    position: "relative",
+    width: 18,
+  },
+  backArrowBody: {
+    borderRadius: 2,
+    height: 2.2,
+    left: 5,
+    position: "absolute",
+    top: 6,
+    width: 11,
+  },
+  backArrowHeadTop: {
+    borderRadius: 2,
+    height: 2.2,
+    left: 1,
+    position: "absolute",
+    top: 4,
+    transform: [{ rotate: "-42deg" }],
+    width: 9,
+  },
+  backArrowHeadBottom: {
+    borderRadius: 2,
+    height: 2.2,
+    left: 1,
+    position: "absolute",
+    top: 8,
+    transform: [{ rotate: "42deg" }],
+    width: 9,
   },
 });

@@ -124,17 +124,10 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 38,
   },
-  title: {
-    color: "#1F1F1F",
-    fontSize: 22,
-    fontWeight: "700",
-    textAlign: "center",
-  },
   subtitle: {
     color: colors.textSecondary,
     fontSize: 14,
     lineHeight: 22,
-    marginTop: 12,
     marginBottom: 28,
     textAlign: "center",
   },
@@ -193,20 +186,5 @@ export const styles = StyleSheet.create({
   },
   submitButton: {
     marginTop: 24,
-  },
-  footer: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 36,
-  },
-  footerText: {
-    color: "#4B5563",
-    fontSize: 13,
-  },
-  footerLink: {
-    color: "#111111",
-    fontSize: 13,
-    fontWeight: "700",
   },
 });

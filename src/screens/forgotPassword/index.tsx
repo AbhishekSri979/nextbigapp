@@ -1,16 +1,10 @@
 import React, { useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StatusBar,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { ScrollView, StatusBar, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 
 import {
+  AuthBackHeader,
   CustomButton,
   MailIcon,
   showErrorToast,
@@ -219,7 +213,11 @@ function ForgotPasswordScreen(): React.JSX.Element {
           <PatternHeader />
 
           <View style={styles.content}>
-            <Text style={styles.title}>Forgot Password</Text>
+            <AuthBackHeader
+              title="Forgot Password"
+              onPress={handleBackToLogin}
+            />
+
             <Text style={styles.subtitle}>
               Enter the email address linked to your account and we&apos;ll help
               you reset your password.
@@ -243,13 +241,6 @@ function ForgotPasswordScreen(): React.JSX.Element {
               onPress={handleResetPassword}
               style={styles.submitButton}
             />
-
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>Remembered your password? </Text>
-              <Pressable onPress={handleBackToLogin}>
-                <Text style={styles.footerLink}>Sign In</Text>
-              </Pressable>
-            </View>
           </View>
         </View>
       </ScrollView>

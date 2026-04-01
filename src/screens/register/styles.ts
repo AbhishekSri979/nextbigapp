@@ -124,13 +124,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 38,
   },
-  title: {
-    color: "#1F1F1F",
-    fontSize: 22,
-    fontWeight: "700",
-    marginBottom: 28,
-    textAlign: "center",
-  },
   formGroup: {
     gap: 14,
   },
@@ -221,21 +214,6 @@ export const styles = StyleSheet.create({
   },
   registerButton: {
     marginTop: 24,
-  },
-  footer: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 36,
-  },
-  footerText: {
-    color: "#4B5563",
-    fontSize: 13,
-  },
-  footerLink: {
-    color: "#111111",
-    fontSize: 13,
-    fontWeight: "700",
   },
   modalOverlay: {
     backgroundColor: "rgba(15, 23, 42, 0.32)",

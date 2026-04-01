@@ -15,6 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 
 import {
   AppLoader,
+  AuthBackHeader,
   ChevronDownIcon,
   CustomButton,
   EyeIcon,
@@ -96,9 +97,9 @@ function hexToRgba(hexColor: string, opacity: number): string {
   const sixDigitHex =
     normalizedHex.length === 3
       ? normalizedHex
-        .split("")
-        .map((character) => `${character}${character}`)
-        .join("")
+          .split("")
+          .map((character) => `${character}${character}`)
+          .join("")
       : normalizedHex;
 
   const red = Number.parseInt(sixDigitHex.slice(0, 2), 16);
@@ -133,8 +134,9 @@ function isSameDay(firstDate: Date | null, secondDate: Date): boolean {
 }
 
 function formatDate(date: Date): string {
-  return `${date.getDate().toString().padStart(2, "0")} ${MONTH_NAMES[date.getMonth()]
-    } ${date.getFullYear()}`;
+  return `${date.getDate().toString().padStart(2, "0")} ${
+    MONTH_NAMES[date.getMonth()]
+  } ${date.getFullYear()}`;
 }
 
 function formatDateForRequest(date: Date): string {
@@ -208,18 +210,49 @@ const HEADER_DARK_ACCENT = "rgba(0, 0, 0, 0.08)";
 function PatternHeader(): React.JSX.Element {
   return (
     <View style={styles.header}>
-      <View style={{ ...styles.headerOrbLarge, backgroundColor: HEADER_GLOW, }} />
-      <View style={{ ...styles.headerOrbSmall, backgroundColor: HEADER_DARK_ACCENT, }} />
-      <View style={{ ...styles.headerRibbon, backgroundColor: HEADER_SOFT_LIGHT, }} />
-      <View style={{ ...styles.headerArc, borderColor: HEADER_SOFT_LIGHT, }} />
-      <View style={{ ...styles.headerDotRow, backgroundColor: HEADER_GLOW, }}>
-        <View style={{ ...styles.headerDot, backgroundColor: hexToRgba(colors.white, 0.5), }} />
-        <View style={{ ...styles.headerDot, backgroundColor: hexToRgba(colors.white, 0.5), }} />
-        <View style={{ ...styles.headerDot, backgroundColor: hexToRgba(colors.white, 0.5), }} />
+      <View
+        style={{ ...styles.headerOrbLarge, backgroundColor: HEADER_GLOW }}
+      />
+      <View
+        style={{
+          ...styles.headerOrbSmall,
+          backgroundColor: HEADER_DARK_ACCENT,
+        }}
+      />
+      <View
+        style={{ ...styles.headerRibbon, backgroundColor: HEADER_SOFT_LIGHT }}
+      />
+      <View style={{ ...styles.headerArc, borderColor: HEADER_SOFT_LIGHT }} />
+      <View style={{ ...styles.headerDotRow, backgroundColor: HEADER_GLOW }}>
+        <View
+          style={{
+            ...styles.headerDot,
+            backgroundColor: hexToRgba(colors.white, 0.5),
+          }}
+        />
+        <View
+          style={{
+            ...styles.headerDot,
+            backgroundColor: hexToRgba(colors.white, 0.5),
+          }}
+        />
+        <View
+          style={{
+            ...styles.headerDot,
+            backgroundColor: hexToRgba(colors.white, 0.5),
+          }}
+        />
       </View>
-      <View style={{ ...styles.logoAura, backgroundColor: HEADER_SOFT_LIGHT, }} />
+      <View
+        style={{ ...styles.logoAura, backgroundColor: HEADER_SOFT_LIGHT }}
+      />
 
-      <View style={{ ...styles.logoBadge, borderColor: hexToRgba(colors.white, 0.35), }}>
+      <View
+        style={{
+          ...styles.logoBadge,
+          borderColor: hexToRgba(colors.white, 0.35),
+        }}
+      >
         <View style={{ ...styles.logoMark }}>
           <View style={{ ...styles.logoCircle }} />
           <View style={{ ...styles.logoCut }} />
@@ -302,7 +335,7 @@ function RegisterScreen(): React.JSX.Element {
   const [showPasswordTooltip, setShowPasswordTooltip] = useState(false);
   const calendarDays = buildCalendarDays(calendarMonth, today);
   const canGoToNextMonth =
-    addMonths(calendarMonth, 1).getTime() <= startOfMonth(today).getTime();    
+    addMonths(calendarMonth, 1).getTime() <= startOfMonth(today).getTime();
 
   useEffect(() => {
     if (registrationStatus === "success") {
@@ -328,7 +361,7 @@ function RegisterScreen(): React.JSX.Element {
     }
   }, [dispatch, registrationError, registrationMessage, registrationStatus]);
 
-  const updateField = <Key extends keyof FormValues,>(
+  const updateField = <Key extends keyof FormValues>(
     field: Key,
     value: FormValues[Key]
   ) => {
@@ -380,7 +413,8 @@ function RegisterScreen(): React.JSX.Element {
       return;
     }
 
-    const { confirmPassword: _confirmPassword, ...registrationValues } = formValues;
+    const { confirmPassword: _confirmPassword, ...registrationValues } =
+      formValues;
     dispatch(createUserAccountRequestAction(registrationValues));
   };
 
@@ -398,10 +432,7 @@ function RegisterScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["left", "right", "bottom"]}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={colors.primary}
-      />
+      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -413,7 +444,7 @@ function RegisterScreen(): React.JSX.Element {
           <PatternHeader />
 
           <View style={styles.content}>
-            <Text style={styles.title}>Create Account</Text>
+            <AuthBackHeader title="Create Account" onPress={handleLogin} />
 
             <View style={styles.formGroup}>
               <RegisterField
@@ -465,7 +496,9 @@ function RegisterScreen(): React.JSX.Element {
                 rightAccessory={
                   <View style={styles.passwordAccessoryRow}>
                     <Pressable
-                      onPress={() => setShowPasswordTooltip((current) => !current)}
+                      onPress={() =>
+                        setShowPasswordTooltip((current) => !current)
+                      }
                       hitSlop={10}
                       style={styles.accessoryButton}
                     >
@@ -539,13 +572,6 @@ function RegisterScreen(): React.JSX.Element {
               disabled={isRegistrationLoading}
               style={styles.registerButton}
             />
-
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>Already have an account? </Text>
-              <Pressable onPress={handleLogin}>
-                <Text style={styles.footerLink}>Sign In</Text>
-              </Pressable>
-            </View>
           </View>
         </View>
       </ScrollView>
@@ -565,7 +591,10 @@ function RegisterScreen(): React.JSX.Element {
           <View style={styles.calendarCard}>
             <View style={styles.calendarHeader}>
               <Pressable
-                style={{ ...styles.calendarNavButton, backgroundColor: hexToRgba(colors.primary, 0.1) }}
+                style={{
+                  ...styles.calendarNavButton,
+                  backgroundColor: hexToRgba(colors.primary, 0.1),
+                }}
                 onPress={() =>
                   setCalendarMonth((currentMonth) =>
                     addMonths(currentMonth, -1)
@@ -584,13 +613,13 @@ function RegisterScreen(): React.JSX.Element {
                 style={[
                   styles.calendarNavButton,
                   !canGoToNextMonth ? styles.calendarNavButtonDisabled : null,
-                  { backgroundColor: hexToRgba(colors.primary, 0.1) }
+                  { backgroundColor: hexToRgba(colors.primary, 0.1) },
                 ]}
                 onPress={() =>
                   canGoToNextMonth
                     ? setCalendarMonth((currentMonth) =>
-                      addMonths(currentMonth, 1)
-                    )
+                        addMonths(currentMonth, 1)
+                      )
                     : undefined
                 }
                 disabled={!canGoToNextMonth}
@@ -600,8 +629,8 @@ function RegisterScreen(): React.JSX.Element {
             </View>
 
             <View style={styles.weekRow}>
-              {WEEK_DAYS.map((day,i) => (
-                <Text key={day+i} style={styles.weekDayText}>
+              {WEEK_DAYS.map((day, i) => (
+                <Text key={day + i} style={styles.weekDayText}>
                   {day}
                 </Text>
               ))}
@@ -650,6 +679,5 @@ function RegisterScreen(): React.JSX.Element {
     </SafeAreaView>
   );
 }
-
 
 export default RegisterScreen;
