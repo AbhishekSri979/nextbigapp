@@ -34,6 +34,7 @@ function usersReducer(
         ...state,
         loading: true,
         error: null,
+        message: null,
         status: 'loading',
       };
 
@@ -42,6 +43,7 @@ function usersReducer(
         ...state,
         loading: false,
         data: Array.isArray(action.data) ? action.data : state.data,
+        error: null,
         message: action.message ?? null,
         status: 'success',
       };
@@ -51,7 +53,17 @@ function usersReducer(
         ...state,
         loading: false,
         error: typeof action.data === 'string' ? action.data : 'Request failed',
+        message: null,
         status: 'error',
+      };
+
+    case ApIConstant.API_CREATE_USER_ACCOUNT_RESET:
+      return {
+        ...state,
+        loading: false,
+        error: null,
+        message: null,
+        status: 'idle',
       };
 
     case ApIConstant.UPDATE_LODING_STATE:

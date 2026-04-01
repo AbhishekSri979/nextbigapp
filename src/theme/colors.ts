@@ -18,5 +18,11 @@ export const colors = {
   textMuted: "#A2ADC2",
   shadow: "#173F92",
   googleBlue: "#4285F4",
+  success: "#16A34A",
+  successSurface: "#F0FDF4",
+  successBorder: "#BBF7D0",
+  error: "#DC2626",
+  errorSurface: "#FEF2F2",
+  errorBorder: "#FECACA",
   white: "#FFFFFF",
 };

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StatusBar, View } from 'react-native';
 
+import { AppToast } from '../components/common';
 import { colors } from '../theme/colors';
 import LoginScreen from '../screens/login';
 import RegisterScreen from '../screens/register';
@@ -21,6 +22,7 @@ function App(): React.JSX.Element {
       ) : (
         <RegisterScreen onLogin={() => setActiveScreen('login')} />
       )}
+      <AppToast />
     </View>
   );
 }

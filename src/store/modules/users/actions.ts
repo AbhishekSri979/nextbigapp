@@ -10,3 +10,7 @@ export const createUserAccountRequestAction = (
     key,
   },
 });
+
+export const resetCreateUserAccountStateAction = () => ({
+  type: ApIConstant.API_CREATE_USER_ACCOUNT_RESET,
+});

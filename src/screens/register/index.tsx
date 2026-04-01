@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  Alert,
   Modal,
   Pressable,
   ScrollView,
@@ -19,10 +18,15 @@ import {
   CustomButton,
   EyeIcon,
   InfoIcon,
+  showErrorToast,
+  showSuccessToast,
 } from "../../components/common";
 import { colors } from "../../theme/colors";
 import { styles } from "./styles";
-import { createUserAccountRequestAction } from "../../store/modules/users/actions";
+import {
+  createUserAccountRequestAction,
+  resetCreateUserAccountStateAction,
+} from "../../store/modules/users/actions";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 
 type RegisterScreenProps = {
@@ -79,6 +83,15 @@ const MONTH_NAMES = [
   "November",
   "December",
 ] as const;
+
+const INITIAL_FORM_VALUES: FormValues = {
+  fullName: "",
+  dob: "",
+  mobile: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+};
 
 function hexToRgba(hexColor: string, opacity: number): string {
   const normalizedHex = hexColor.replace("#", "");
@@ -275,18 +288,14 @@ function RegisterScreen({
   onLogin,
 }: RegisterScreenProps): React.JSX.Element {
   const dispatch = useAppDispatch();
-  const isRegistrationLoading = useAppSelector(
-    (state) => state.users.loading
-  );
+  const {
+    loading: isRegistrationLoading,
+    status: registrationStatus,
+    error: registrationError,
+    message: registrationMessage,
+  } = useAppSelector((state) => state.users);
   const today = startOfDay(new Date());
-  const [formValues, setFormValues] = useState<FormValues>({
-    fullName: "",
-    dob: "",
-    mobile: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
+  const [formValues, setFormValues] = useState<FormValues>(INITIAL_FORM_VALUES);
   const [selectedDob, setSelectedDob] = useState<Date | null>(null);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [isCalendarVisible, setCalendarVisible] = useState(false);
@@ -297,6 +306,29 @@ function RegisterScreen({
   const calendarDays = buildCalendarDays(calendarMonth, today);
   const canGoToNextMonth =
     addMonths(calendarMonth, 1).getTime() <= startOfMonth(today).getTime();    
+
+  useEffect(() => {
+    if (registrationStatus === "success") {
+      showSuccessToast({
+        title: "Registration successful",
+        message:
+          registrationMessage ?? "Your account has been created successfully.",
+      });
+      setFormValues(INITIAL_FORM_VALUES);
+      setSelectedDob(null);
+      setFormErrors({});
+      dispatch(resetCreateUserAccountStateAction());
+      return;
+    }
+
+    if (registrationStatus === "error") {
+      showErrorToast({
+        title: "Registration failed",
+        message: registrationError ?? "Please try again.",
+      });
+      dispatch(resetCreateUserAccountStateAction());
+    }
+  }, [dispatch, registrationError, registrationMessage, registrationStatus]);
 
   const updateField = <Key extends keyof FormValues,>(
     field: Key,
@@ -343,6 +375,10 @@ function RegisterScreen({
     setFormErrors(nextErrors);
 
     if (Object.keys(nextErrors).length > 0) {
+      showErrorToast({
+        title: "Check your details",
+        message: "Please correct the highlighted fields and try again.",
+      });
       return;
     }
 
@@ -356,7 +392,10 @@ function RegisterScreen({
       return;
     }
 
-    Alert.alert("Sign In", "Login screen navigation is not connected yet.");
+    showErrorToast({
+      title: "Navigation unavailable",
+      message: "Login screen navigation is not connected yet.",
+    });
   };
 
   return (

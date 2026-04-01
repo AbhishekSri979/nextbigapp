@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import {
-  Alert,
   Image,
   Pressable,
   ScrollView,
   StatusBar,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -18,6 +16,7 @@ import {
   EyeIcon,
   LockIcon,
   MailIcon,
+  showErrorToast,
 } from "../../components/common";
 import { colors } from "../../theme/colors";
 import { images } from "../../theme/images";
@@ -62,7 +61,6 @@ function hexToRgba(hexColor: string, opacity: number): string {
   return `rgba(${red}, ${green}, ${blue}, ${opacity})`;
 }
 
-const SCREEN_BACKGROUND = colors.background;
 const HEADER_GLOW = hexToRgba(colors.white, 0.15);
 const HEADER_SOFT_LIGHT = hexToRgba(colors.white, 0.1);
 const HEADER_DARK_ACCENT = "rgba(0, 0, 0, 0.08)";
@@ -190,11 +188,17 @@ function LoginScreen({ onRegister }: LoginScreenProps): React.JSX.Element {
 
   const handleLogin = () => {
     if (!email || !password) {
-      Alert.alert("Error", "Please enter email and password");
+      showErrorToast({
+        title: "Missing details",
+        message: "Please enter your email and password.",
+      });
       return;
     }
 
-    Alert.alert("Login", "Login functionality to be implemented");
+    showErrorToast({
+      title: "Login unavailable",
+      message: "Login functionality is not available yet.",
+    });
   };
 
   const handleRegister = () => {
@@ -203,14 +207,17 @@ function LoginScreen({ onRegister }: LoginScreenProps): React.JSX.Element {
       return;
     }
 
-    Alert.alert("Register", "Register functionality to be implemented");
+    showErrorToast({
+      title: "Navigation unavailable",
+      message: "Register screen navigation is not connected yet.",
+    });
   };
 
   const handleSocialLogin = (provider: string) => {
-    Alert.alert(
-      `${provider} Login`,
-      `${provider} login functionality to be implemented`
-    );
+    showErrorToast({
+      title: `${provider} login unavailable`,
+      message: `${provider} login functionality is not available yet.`,
+    });
   };
 
   return (
