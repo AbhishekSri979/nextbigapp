@@ -21,6 +21,8 @@ import {
 } from "../../components/common";
 import { colors } from "../../theme/colors";
 import { styles } from "./styles";
+import { useDispatch } from "react-redux";
+import { createUserAccountRequestAction } from "../../store/modules/users/actions";
 
 type RegisterScreenProps = {
   onLogin?: () => void;
@@ -82,9 +84,9 @@ function hexToRgba(hexColor: string, opacity: number): string {
   const sixDigitHex =
     normalizedHex.length === 3
       ? normalizedHex
-          .split("")
-          .map((character) => `${character}${character}`)
-          .join("")
+        .split("")
+        .map((character) => `${character}${character}`)
+        .join("")
       : normalizedHex;
 
   const red = Number.parseInt(sixDigitHex.slice(0, 2), 16);
@@ -119,9 +121,8 @@ function isSameDay(firstDate: Date | null, secondDate: Date): boolean {
 }
 
 function formatDate(date: Date): string {
-  return `${date.getDate().toString().padStart(2, "0")} ${
-    MONTH_NAMES[date.getMonth()]
-  } ${date.getFullYear()}`;
+  return `${date.getDate().toString().padStart(2, "0")} ${MONTH_NAMES[date.getMonth()]
+    } ${date.getFullYear()}`;
 }
 
 function buildCalendarDays(month: Date, today: Date): CalendarDay[] {
@@ -266,6 +267,7 @@ function RegisterField({
 function RegisterScreen({
   onLogin,
 }: RegisterScreenProps): React.JSX.Element {
+  const dispatch = useDispatch();
   const today = startOfDay(new Date());
   const [formValues, setFormValues] = useState<FormValues>({
     fullName: "",
@@ -281,7 +283,6 @@ function RegisterScreen({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showPasswordTooltip, setShowPasswordTooltip] = useState(false);
-
   const calendarDays = buildCalendarDays(calendarMonth, today);
   const canGoToNextMonth =
     addMonths(calendarMonth, 1).getTime() <= startOfMonth(today).getTime();
@@ -326,11 +327,7 @@ function RegisterScreen({
     if (Object.keys(nextErrors).length > 0) {
       return;
     }
-
-    Alert.alert(
-      "Registration Ready",
-      "All fields look good. You can connect this button to your API next."
-    );
+    dispatch(createUserAccountRequestAction(formValues));
   };
 
   const handleLogin = () => {
@@ -486,7 +483,7 @@ function RegisterScreen({
           <View style={styles.calendarCard}>
             <View style={styles.calendarHeader}>
               <Pressable
-                style={{...styles.calendarNavButton,backgroundColor: hexToRgba(colors.primary, 0.1)}}
+                style={{ ...styles.calendarNavButton, backgroundColor: hexToRgba(colors.primary, 0.1) }}
                 onPress={() =>
                   setCalendarMonth((currentMonth) =>
                     addMonths(currentMonth, -1)
@@ -510,8 +507,8 @@ function RegisterScreen({
                 onPress={() =>
                   canGoToNextMonth
                     ? setCalendarMonth((currentMonth) =>
-                        addMonths(currentMonth, 1)
-                      )
+                      addMonths(currentMonth, 1)
+                    )
                     : undefined
                 }
                 disabled={!canGoToNextMonth}
@@ -521,8 +518,8 @@ function RegisterScreen({
             </View>
 
             <View style={styles.weekRow}>
-              {WEEK_DAYS.map((day) => (
-                <Text key={day} style={styles.weekDayText}>
+              {WEEK_DAYS.map((day,i) => (
+                <Text key={day+i} style={styles.weekDayText}>
                   {day}
                 </Text>
               ))}

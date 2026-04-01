@@ -30,6 +30,8 @@ export function* handleApiCalls(
   successAction: string,
   errorAction: string,
 ): SagaIterator {
+  console.log("handleApiCalls called with payload:", payload);
+
   try {
     const response: ApiCallResponse = yield call(
       apiFunction,
@@ -41,6 +43,7 @@ export function* handleApiCalls(
       result && typeof result === 'object'
         ? (result as ApiResultPayload)
         : undefined;
+    console.log("API Response:", response);
 
     yield put({ type: ApIConstant.UPDATE_LODING_STATE, data: false });
 
