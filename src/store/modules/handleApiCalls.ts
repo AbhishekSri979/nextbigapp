@@ -42,7 +42,7 @@ export function* handleApiCalls(
       result && typeof result === 'object'
         ? (result as ApiResultPayload)
         : undefined;
-    console.log("API Response:", response);
+    console.log("API Response:", resultPayload);
 
     yield put({ type: ApIConstant.UPDATE_LODING_STATE, data: false });
 
@@ -50,7 +50,7 @@ export function* handleApiCalls(
       yield put({
         type: successAction,
         data: resultPayload.data,
-        message: resultPayload.message,
+        message: resultPayload?.message,
       });
       return;
     }

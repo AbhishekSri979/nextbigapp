@@ -318,6 +318,7 @@ function RegisterScreen({
       setSelectedDob(null);
       setFormErrors({});
       dispatch(resetCreateUserAccountStateAction());
+      handleLogin();
       return;
     }
 
