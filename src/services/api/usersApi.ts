@@ -10,3 +10,5 @@ const headers = {
 export const registrationApi = async (data: unknown) =>
   Method.POST(`${Users}/Registration`, apiClient, data, headers);
 
+export const loginApi = async (data: unknown) =>
+  Method.POST(`${Users}/Login`, apiClient, data, headers);

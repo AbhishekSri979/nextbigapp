@@ -21,6 +21,7 @@ import {
 import { colors } from "../../theme/colors";
 import { images } from "../../theme/images";
 import { styles } from "./styles";
+import { useDispatch } from "react-redux";
 
 type LoginScreenProps = {
   onRegister?: () => void;
@@ -216,6 +217,7 @@ function LoginScreen({
   onRegister,
   onForgotPassword,
 }: LoginScreenProps): React.JSX.Element {
+  const dispatch=useDispatch()
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);

@@ -57,6 +57,34 @@ function usersReducer(
         status: 'error',
       };
 
+       case ApIConstant.API_LOGIN_LOAD:
+      return {
+        ...state,
+        loading: true,
+        error: null,
+        message: null,
+        status: 'loading',
+      };
+
+    case ApIConstant.API_LOGIN_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        data: Array.isArray(action.data) ? action.data : state.data,
+        error: null,
+        message: action.message ?? null,
+        status: 'success',
+      };
+
+    case ApIConstant.API_LOGIN_ERROR:
+      return {
+        ...state,
+        loading: false,
+        error: typeof action.data === 'string' ? action.data : 'Request failed',
+        message: null,
+        status: 'error',
+      };
+
     case ApIConstant.API_CREATE_USER_ACCOUNT_RESET:
       return {
         ...state,

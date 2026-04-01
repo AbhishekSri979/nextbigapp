@@ -1,12 +1,12 @@
 import type { SagaIterator } from 'redux-saga';
 import { call, takeLatest } from 'redux-saga/effects';
 
-import { registrationApi } from '../../../services/api/usersApi';
+import { loginApi, registrationApi } from '../../../services/api/usersApi';
 import { handleApiCalls } from '../handleApiCalls';
 
 import { ApIConstant } from './actionTypes';
 
-interface CreateUserAccountAction {
+interface UserAccountAction {
   type: string;
   payload: {
     requestData?: unknown;
@@ -14,8 +14,10 @@ interface CreateUserAccountAction {
   };
 }
 
+
+
 export function* createUserAccountSaga(
-  action: CreateUserAccountAction,
+  action: UserAccountAction,
 ): SagaIterator {
   yield call(
     handleApiCalls,
@@ -26,9 +28,25 @@ export function* createUserAccountSaga(
   );
 }
 
+export function* loginUserAccountSaga(
+  action: UserAccountAction,
+): SagaIterator {
+  yield call(
+    handleApiCalls,
+    loginApi,
+    action.payload ?? {},
+    ApIConstant.API_LOGIN_SUCCESS,
+    ApIConstant.API_LOGIN_ERROR,
+  );
+}
+
 export function* watchUsersSaga(): SagaIterator {
   yield takeLatest(
     ApIConstant.API_CREATE_USER_ACCOUNT_LOAD,
     createUserAccountSaga,
+  );
+  yield takeLatest(
+    ApIConstant.API_LOGIN_LOAD,
+    loginUserAccountSaga,
   );
 }
