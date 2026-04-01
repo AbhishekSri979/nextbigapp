@@ -337,7 +337,9 @@ function RegisterScreen({
     if (Object.keys(nextErrors).length > 0) {
       return;
     }
-    dispatch(createUserAccountRequestAction(formValues));
+
+    const { confirmPassword: _confirmPassword, ...registrationValues } = formValues;
+    dispatch(createUserAccountRequestAction(registrationValues));
   };
 
   const handleLogin = () => {

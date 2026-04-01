@@ -36,7 +36,6 @@ export function* handleApiCalls(
     const response: ApiCallResponse = yield call(
       apiFunction,
       payload.requestData,
-      payload.key,
     );
     const { result, status } = response;
     const resultPayload =
