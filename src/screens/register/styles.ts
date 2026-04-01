@@ -193,6 +193,20 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  passwordToggleButton: {
+    alignItems: "center",
+    backgroundColor: "#F6F8FB",
+    borderColor: "#E4E9F2",
+    borderRadius: 12,
+    borderWidth: 1,
+    height: 34,
+    justifyContent: "center",
+    width: 34,
+  },
+  passwordToggleButtonActive: {
+    backgroundColor: "#E9F7F7",
+    borderColor: "#B8E4E4",
+  },
   helperText: {
     color: colors.textSecondary,
     fontSize: 12,

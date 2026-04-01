@@ -24,6 +24,7 @@ import { styles } from "./styles";
 
 type LoginScreenProps = {
   onRegister?: () => void;
+  onForgotPassword?: () => void;
 };
 
 type LoginFieldProps = {
@@ -36,13 +37,23 @@ type LoginFieldProps = {
   keyboardType?: TextInputProps["keyboardType"];
   autoCapitalize?: TextInputProps["autoCapitalize"];
   rightAccessory?: React.ReactNode;
+  error?: string;
 };
+
+type LoginValues = {
+  email: string;
+  password: string;
+};
+
+type LoginErrors = Partial<Record<keyof LoginValues, string>>;
 
 type SocialProvider = {
   key: string;
   label: string;
   icon: number;
 };
+
+const EMAIL_RULE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function hexToRgba(hexColor: string, opacity: number): string {
   const normalizedHex = hexColor.replace("#", "");
@@ -126,31 +137,35 @@ function LoginField({
   keyboardType,
   autoCapitalize,
   rightAccessory,
+  error,
 }: LoginFieldProps): React.JSX.Element {
   return (
-    <View style={styles.fieldCard}>
-      <Text style={styles.fieldLabel}>{label}</Text>
-      <View style={styles.fieldRow}>
-        <View style={styles.fieldIconWrap}>
-          <FieldIcon icon={icon} />
+    <View style={styles.fieldBlock}>
+      <View style={[styles.fieldCard, error ? styles.fieldCardError : null]}>
+        <Text style={styles.fieldLabel}>{label}</Text>
+        <View style={styles.fieldRow}>
+          <View style={styles.fieldIconWrap}>
+            <FieldIcon icon={icon} />
+          </View>
+          <View style={styles.fieldControl}>
+            <TextInput
+              style={styles.fieldInput}
+              value={value}
+              onChangeText={onChangeText}
+              placeholder={placeholder}
+              placeholderTextColor="#C1C4CC"
+              secureTextEntry={secureTextEntry}
+              keyboardType={keyboardType}
+              autoCapitalize={autoCapitalize}
+              selectionColor={colors.primary}
+            />
+          </View>
+          {rightAccessory ? (
+            <View style={styles.fieldAccessory}>{rightAccessory}</View>
+          ) : null}
         </View>
-        <View style={styles.fieldControl}>
-          <TextInput
-            style={styles.fieldInput}
-            value={value}
-            onChangeText={onChangeText}
-            placeholder={placeholder}
-            placeholderTextColor="#C1C4CC"
-            secureTextEntry={secureTextEntry}
-            keyboardType={keyboardType}
-            autoCapitalize={autoCapitalize}
-            selectionColor="#111111"
-          />
-        </View>
-        {rightAccessory ? (
-          <View style={styles.fieldAccessory}>{rightAccessory}</View>
-        ) : null}
       </View>
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
     </View>
   );
 }
@@ -181,16 +196,61 @@ function SocialLoginButton({
   );
 }
 
-function LoginScreen({ onRegister }: LoginScreenProps): React.JSX.Element {
+function getValidationErrors(values: LoginValues): LoginErrors {
+  const nextErrors: LoginErrors = {};
+
+  if (!values.email.trim()) {
+    nextErrors.email = "Please enter your email address.";
+  } else if (!EMAIL_RULE.test(values.email.trim())) {
+    nextErrors.email = "Please enter a valid email address.";
+  }
+
+  if (!values.password) {
+    nextErrors.password = "Please enter your password.";
+  }
+
+  return nextErrors;
+}
+
+function LoginScreen({
+  onRegister,
+  onForgotPassword,
+}: LoginScreenProps): React.JSX.Element {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [formErrors, setFormErrors] = useState<LoginErrors>({});
+
+  const updateField = (field: keyof LoginValues, value: string) => {
+    if (field === "email") {
+      setEmail(value);
+    } else {
+      setPassword(value);
+    }
+
+    setFormErrors((currentErrors) => {
+      if (!currentErrors[field]) {
+        return currentErrors;
+      }
+
+      const nextErrors = { ...currentErrors };
+
+      delete nextErrors[field];
+
+      return nextErrors;
+    });
+  };
 
   const handleLogin = () => {
-    if (!email || !password) {
+    const nextErrors = getValidationErrors({ email, password });
+
+    setFormErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length > 0) {
       showErrorToast({
-        title: "Missing details",
-        message: "Please enter your email and password.",
+        title: "Check your details",
+        message: "Please correct the highlighted fields and try again.",
       });
       return;
     }
@@ -198,6 +258,18 @@ function LoginScreen({ onRegister }: LoginScreenProps): React.JSX.Element {
     showErrorToast({
       title: "Login unavailable",
       message: "Login functionality is not available yet.",
+    });
+  };
+
+  const handleForgotPassword = () => {
+    if (onForgotPassword) {
+      onForgotPassword();
+      return;
+    }
+
+    showErrorToast({
+      title: "Forgot password unavailable",
+      message: "Password reset functionality is not connected yet.",
     });
   };
 
@@ -231,6 +303,7 @@ function LoginScreen({ onRegister }: LoginScreenProps): React.JSX.Element {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         bounces={false}
+        keyboardShouldPersistTaps="handled"
       >
         <View style={styles.card}>
           <PatternHeader />
@@ -243,28 +316,69 @@ function LoginScreen({ onRegister }: LoginScreenProps): React.JSX.Element {
                 icon="mail"
                 label="Email"
                 value={email}
-                onChangeText={setEmail}
-                placeholder="hello@reallygreatsite.com"
+                onChangeText={(text) => updateField("email", text)}
+                placeholder="Enter your email address"
                 keyboardType="email-address"
                 autoCapitalize="none"
+                error={formErrors.email}
               />
 
               <LoginField
                 icon="lock"
                 label="Password"
                 value={password}
-                onChangeText={setPassword}
-                placeholder="........"
+                onChangeText={(text) => updateField("password", text)}
+                placeholder="Enter your password"
                 secureTextEntry={!showPassword}
                 rightAccessory={
                   <Pressable
                     onPress={() => setShowPassword((current) => !current)}
                     hitSlop={10}
+                    style={[
+                      styles.passwordToggleButton,
+                      showPassword ? styles.passwordToggleButtonActive : null,
+                    ]}
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                   >
-                    <EyeIcon />
+                    <EyeIcon
+                      color={showPassword ? colors.primary : "#7C88A1"}
+                      isVisible={showPassword}
+                    />
                   </Pressable>
                 }
+                error={formErrors.password}
               />
+            </View>
+
+            <View style={styles.optionsRow}>
+              <Pressable
+                style={styles.rememberRow}
+                onPress={() => setRememberMe((current) => !current)}
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: rememberMe }}
+                accessibilityLabel="Remember me"
+              >
+                <View
+                  style={[
+                    styles.checkbox,
+                    rememberMe ? styles.checkboxChecked : null,
+                  ]}
+                >
+                  {rememberMe ? <View style={styles.checkboxCheck} /> : null}
+                </View>
+                <Text style={styles.rememberText}>Remember me</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={handleForgotPassword}
+                accessibilityRole="button"
+                accessibilityLabel="Forgot password"
+              >
+                <Text style={styles.forgotText}>Forgot Password?</Text>
+              </Pressable>
             </View>
 
             <CustomButton

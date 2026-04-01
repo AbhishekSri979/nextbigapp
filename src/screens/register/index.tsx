@@ -477,9 +477,19 @@ function RegisterScreen({
                     <Pressable
                       onPress={() => setShowPassword((current) => !current)}
                       hitSlop={10}
-                      style={styles.accessoryButton}
+                      style={[
+                        styles.passwordToggleButton,
+                        showPassword ? styles.passwordToggleButtonActive : null,
+                      ]}
+                      accessibilityRole="button"
+                      accessibilityLabel={
+                        showPassword ? "Hide password" : "Show password"
+                      }
                     >
-                      <EyeIcon />
+                      <EyeIcon
+                        color={showPassword ? colors.primary : "#7C88A1"}
+                        isVisible={showPassword}
+                      />
                     </Pressable>
                   </View>
                 }
@@ -503,9 +513,23 @@ function RegisterScreen({
                       setShowConfirmPassword((current) => !current)
                     }
                     hitSlop={10}
-                    style={styles.accessoryButton}
+                    style={[
+                      styles.passwordToggleButton,
+                      showConfirmPassword
+                        ? styles.passwordToggleButtonActive
+                        : null,
+                    ]}
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                      showConfirmPassword
+                        ? "Hide confirm password"
+                        : "Show confirm password"
+                    }
                   >
-                    <EyeIcon />
+                    <EyeIcon
+                      color={showConfirmPassword ? colors.primary : "#7C88A1"}
+                      isVisible={showConfirmPassword}
+                    />
                   </Pressable>
                 }
                 error={formErrors.confirmPassword}

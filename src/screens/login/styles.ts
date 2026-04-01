@@ -133,6 +133,9 @@ export const styles = StyleSheet.create({
   formGroup: {
     gap: 14,
   },
+  fieldBlock: {
+    gap: 6,
+  },
   fieldCard: {
     backgroundColor: colors.surface,
     borderColor: "#F4F4F5",
@@ -148,6 +151,9 @@ export const styles = StyleSheet.create({
     },
     shadowOpacity: 0.18,
     shadowRadius: 16,
+  },
+  fieldCardError: {
+    borderColor: "#F0B6B8",
   },
   fieldLabel: {
     color: "#1F1F1F",
@@ -176,6 +182,67 @@ export const styles = StyleSheet.create({
   },
   fieldAccessory: {
     marginLeft: 10,
+  },
+  errorText: {
+    color: "#D14343",
+    fontSize: 12,
+    fontWeight: "500",
+    paddingHorizontal: 4,
+  },
+  passwordToggleButton: {
+    alignItems: "center",
+    backgroundColor: "#F6F8FB",
+    borderColor: "#E4E9F2",
+    borderRadius: 12,
+    borderWidth: 1,
+    height: 34,
+    justifyContent: "center",
+    width: 34,
+  },
+  passwordToggleButtonActive: {
+    backgroundColor: "#E9F7F7",
+    borderColor: "#B8E4E4",
+  },
+  optionsRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 18,
+  },
+  rememberRow: {
+    alignItems: "center",
+    flexDirection: "row",
+  },
+  checkbox: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: "#D8E0ED",
+    borderRadius: 5,
+    borderWidth: 1.4,
+    height: 18,
+    justifyContent: "center",
+    marginRight: 8,
+    width: 18,
+  },
+  checkboxChecked: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  checkboxCheck: {
+    backgroundColor: colors.white,
+    borderRadius: 2,
+    height: 7,
+    width: 7,
+  },
+  rememberText: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontWeight: "500",
+  },
+  forgotText: {
+    color: colors.primary,
+    fontSize: 13,
+    fontWeight: "700",
   },
   loginButton: {
     marginTop: 22,

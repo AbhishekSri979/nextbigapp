@@ -11,6 +11,11 @@ type LockIconProps = IconProps & {
   surfaceColor?: string;
 };
 
+type EyeIconProps = IconProps & {
+  isVisible?: boolean;
+  surfaceColor?: string;
+};
+
 export function MailIcon({
   color = "#8C98B3",
 }: IconProps): React.JSX.Element {
@@ -38,10 +43,26 @@ export function LockIcon({
 
 export function EyeIcon({
   color = "#97A3BD",
-}: IconProps): React.JSX.Element {
+  isVisible = true,
+  surfaceColor = colors.surface,
+}: EyeIconProps): React.JSX.Element {
   return (
-    <View style={[styles.eyeIcon, { borderColor: color }]}>
-      <View style={[styles.eyePupil, { backgroundColor: color }]} />
+    <View style={styles.eyeIconFrame}>
+      <View style={[styles.eyeIcon, { borderColor: color }]}>
+        <View
+          style={[
+            styles.eyeIris,
+            {
+              backgroundColor: surfaceColor,
+              borderColor: color,
+            },
+          ]}
+        />
+        <View style={[styles.eyePupil, { backgroundColor: color }]} />
+      </View>
+      {!isVisible ? (
+        <View style={[styles.eyeSlash, { backgroundColor: color }]} />
+      ) : null}
     </View>
   );
 }
@@ -117,19 +138,39 @@ const styles = StyleSheet.create({
     height: 4,
     width: 3,
   },
+  eyeIconFrame: {
+    alignItems: "center",
+    height: 16,
+    justifyContent: "center",
+    width: 20,
+  },
   eyeIcon: {
     alignItems: "center",
     borderRadius: 12,
-    borderWidth: 1.4,
+    borderWidth: 1.6,
     height: 12,
     justifyContent: "center",
     transform: [{ scaleY: 0.8 }],
     width: 18,
   },
+  eyeIris: {
+    borderRadius: 4,
+    borderWidth: 1.1,
+    height: 7,
+    position: "absolute",
+    width: 7,
+  },
   eyePupil: {
-    borderRadius: 2,
-    height: 4,
-    width: 4,
+    borderRadius: 1.7,
+    height: 3.4,
+    width: 3.4,
+  },
+  eyeSlash: {
+    borderRadius: 1,
+    height: 1.8,
+    position: "absolute",
+    transform: [{ rotate: "-36deg" }],
+    width: 19,
   },
   infoIcon: {
     alignItems: "center",
