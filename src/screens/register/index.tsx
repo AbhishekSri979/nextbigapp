@@ -14,6 +14,7 @@ import type { TextInputProps } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
+  AppLoader,
   ChevronDownIcon,
   CustomButton,
   EyeIcon,
@@ -21,8 +22,8 @@ import {
 } from "../../components/common";
 import { colors } from "../../theme/colors";
 import { styles } from "./styles";
-import { useDispatch } from "react-redux";
 import { createUserAccountRequestAction } from "../../store/modules/users/actions";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 
 type RegisterScreenProps = {
   onLogin?: () => void;
@@ -273,7 +274,10 @@ function RegisterField({
 function RegisterScreen({
   onLogin,
 }: RegisterScreenProps): React.JSX.Element {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
+  const isRegistrationLoading = useAppSelector(
+    (state) => state.users.loading
+  );
   const today = startOfDay(new Date());
   const [formValues, setFormValues] = useState<FormValues>({
     fullName: "",
@@ -330,6 +334,10 @@ function RegisterScreen({
   };
 
   const handleRegister = () => {
+    if (isRegistrationLoading) {
+      return;
+    }
+
     const nextErrors = getValidationErrors(formValues);
 
     setFormErrors(nextErrors);
@@ -467,6 +475,7 @@ function RegisterScreen({
             <CustomButton
               title="Register"
               onPress={handleRegister}
+              disabled={isRegistrationLoading}
               style={styles.registerButton}
             />
 
@@ -575,6 +584,8 @@ function RegisterScreen({
           </View>
         </View>
       </Modal>
+
+      <AppLoader visible={isRegistrationLoading} />
     </SafeAreaView>
   );
 }
