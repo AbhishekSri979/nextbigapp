@@ -102,7 +102,7 @@ function showToast(
   {
     title,
     message,
-    position = "bottom",
+    position = "top",
     visibilityTime = DEFAULT_VISIBILITY_TIME,
   }: ShowAppToastParams
 ): void {
@@ -127,7 +127,7 @@ function AppToast(): React.JSX.Element {
   return (
     <Toast
       config={toastConfig}
-      topOffset={16}
+      topOffset={60}
       visibilityTime={DEFAULT_VISIBILITY_TIME}
       autoHide
       position="top"
