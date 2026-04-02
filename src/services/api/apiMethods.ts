@@ -116,7 +116,7 @@ const handleRejectedResponse = (
   const status = response?.status;
 
   if (status && UNAUTHORIZED_STATUS_CODES.has(status)) {
-    return createFailureResponse(url, StatusCodes.Unauthenticate, 'Unauthorized');
+    return createFailureResponse(url, StatusCodes.Unauthenticate, response?.data?.detail || 'Unauthorized');
   }
 
   if (status === SERVICE_UNAVAILABLE_STATUS) {
