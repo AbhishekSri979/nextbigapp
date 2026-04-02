@@ -5,6 +5,7 @@ import LoginScreen from "../screens/login";
 import RegisterScreen from "../screens/register";
 import { createStackNavigator } from "./createStackNavigator";
 import type { AuthStackParamList } from "./types";
+import ResetPasswordScreen from "../screens/resetPassword";
 
 const Stack = createStackNavigator<AuthStackParamList>();
 
@@ -16,6 +17,10 @@ function AuthNavigator(): React.JSX.Element {
       <Stack.Screen
         name="ForgotPassword"
         component={ForgotPasswordScreen}
+      />
+      <Stack.Screen
+        name="ResetPassword"
+        component={ResetPasswordScreen}
       />
     </Stack.Navigator>
   );

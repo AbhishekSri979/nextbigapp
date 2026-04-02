@@ -237,7 +237,7 @@ function ForgotPasswordScreen(): React.JSX.Element {
             />
 
             <CustomButton
-              title="Send Reset Link"
+              title="Send OTP"
               onPress={handleResetPassword}
               style={styles.submitButton}
             />
