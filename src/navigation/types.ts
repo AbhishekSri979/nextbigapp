@@ -10,7 +10,8 @@ export type AuthStackParamList = {
   Register: undefined;
   ForgotPassword: undefined;
   ResetPassword: {
-    email: string;
+    identifier: string;
+    authMode: OtpDeliveryMode;
   };
   OtpScreen: {
     identifier: string;

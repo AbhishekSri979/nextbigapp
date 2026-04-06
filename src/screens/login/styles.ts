@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     flex: 1,
     paddingBottom: 46,
-    paddingTop:50,
+    paddingTop:60,
   },
   brandMarkOuter: {
     alignItems: "center",

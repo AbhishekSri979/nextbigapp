@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ScrollView, StatusBar, Text, TextInput, View } from "react-native";
+import type { KeyboardTypeOptions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 
@@ -11,11 +12,14 @@ import {
   showErrorToast,
   showSuccessToast,
 } from "../../components/common";
-import type { AuthNavigationProp } from "../../navigation";
+import type { AuthNavigationProp, OtpDeliveryMode } from "../../navigation";
 import { colors } from "../../theme/colors";
 import { styles } from "./styles";
 import { useDispatch } from "react-redux";
-import { forgotAccountRequestAction, resetStateAction } from "../../store/modules/users/actions";
+import {
+  forgotAccountRequestAction,
+  resetStateAction,
+} from "../../store/modules/users/actions";
 import { useAppSelector } from "../../store/hooks";
 
 type ForgotPasswordFieldProps = {
@@ -23,10 +27,68 @@ type ForgotPasswordFieldProps = {
   value: string;
   onChangeText: (text: string) => void;
   placeholder: string;
+  keyboardType: KeyboardTypeOptions;
   error?: string;
 };
 
 const EMAIL_RULE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_DIGIT_MIN = 10;
+const PHONE_DIGIT_MAX = 15;
+
+function normalizePhoneDigits(value: string): string {
+  return value.replace(/\D/g, "");
+}
+
+function getRecoveryMode(value: string): OtpDeliveryMode | null {
+  const trimmedValue = value.trim();
+  const phoneDigits = normalizePhoneDigits(trimmedValue);
+
+  if (EMAIL_RULE.test(trimmedValue)) {
+    return "email";
+  }
+
+  if (
+    phoneDigits.length >= PHONE_DIGIT_MIN &&
+    phoneDigits.length <= PHONE_DIGIT_MAX
+  ) {
+    return "phone";
+  }
+
+  return null;
+}
+
+function getValidationError(value: string): string | undefined {
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue) {
+    return "Please enter your email address or phone number.";
+  }
+
+  if (getRecoveryMode(trimmedValue)) {
+    return undefined;
+  }
+
+  return "Please enter a valid email address or phone number.";
+}
+
+function getKeyboardType(value: string): KeyboardTypeOptions {
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue || trimmedValue.includes("@")) {
+    return "email-address";
+  }
+
+  return "phone-pad";
+}
+
+function getNormalizedIdentifier(
+  value: string,
+  recoveryMode: OtpDeliveryMode
+): string {
+  return recoveryMode === "email"
+    ? value.trim().toLowerCase()
+    : normalizePhoneDigits(value);
+}
 
 function hexToRgba(hexColor: string, opacity: number): string {
   const normalizedHex = hexColor.replace("#", "");
@@ -116,7 +178,7 @@ function PatternHeader(): React.JSX.Element {
       >
         <View style={styles.logoMark}>
           <View style={styles.logoCircle} />
-          <View style={styles.logoCut} />
+          {/* <View style={styles.logoCut} /> */}
         </View>
       </View>
     </View>
@@ -128,6 +190,7 @@ function ForgotPasswordField({
   value,
   onChangeText,
   placeholder,
+  keyboardType,
   error,
 }: ForgotPasswordFieldProps): React.JSX.Element {
   return (
@@ -145,8 +208,9 @@ function ForgotPasswordField({
               onChangeText={onChangeText}
               placeholder={placeholder}
               placeholderTextColor="#C1C4CC"
-              keyboardType="email-address"
+              keyboardType={keyboardType}
               autoCapitalize="none"
+              autoCorrect={false}
               selectionColor={colors.primary}
             />
           </View>
@@ -160,25 +224,35 @@ function ForgotPasswordField({
 function ForgotPasswordScreen(): React.JSX.Element {
   const dispatch = useDispatch();
   const navigation = useNavigation<AuthNavigationProp<"ForgotPassword">>();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [error, setError] = useState<string | undefined>();
+  const [submittedRecovery, setSubmittedRecovery] = useState<{
+    authMode: OtpDeliveryMode;
+    identifier: string;
+  } | null>(null);
   const {
     loading: isForgotPasswordLoading,
     status: forgotPasswordStatus,
-    error: forgotPasswordError,
     message: forgotPasswordMessage,
   } = useAppSelector((state) => state.users);
 
   useEffect(() => {
-  if (forgotPasswordStatus === "success") {
-    showSuccessToast({
-      title: "Successfully sent.",
-      message: forgotPasswordMessage ?? "OTP sent successfully.",
-    });
-    navigation.navigate("ResetPassword", { email });
-    dispatch(resetStateAction());
-  }
-}, [forgotPasswordStatus, forgotPasswordMessage, navigation, dispatch]);
+    if (forgotPasswordStatus === "success" && submittedRecovery) {
+      showSuccessToast({
+        title: "Successfully sent.",
+        message: forgotPasswordMessage ?? "OTP sent successfully.",
+      });
+      navigation.navigate("ResetPassword", submittedRecovery);
+      setSubmittedRecovery(null);
+      dispatch(resetStateAction());
+    }
+  }, [
+    forgotPasswordStatus,
+    forgotPasswordMessage,
+    navigation,
+    submittedRecovery,
+    dispatch,
+  ]);
 
   const handleBackToLogin = () => {
     if (navigation.canGoBack()) {
@@ -193,29 +267,54 @@ function ForgotPasswordScreen(): React.JSX.Element {
   };
 
   const handleResetPassword = () => {
-    const trimmedEmail = email.trim();
+    // const validationError = getValidationError(identifier);
 
-    if (!trimmedEmail) {
-      setError("Please enter your email address.");
-      showErrorToast({
-        title: "Missing email",
-        message: "Enter your email address to continue.",
-      });
-      return;
-    }
+    // if (validationError) {
+    //   setError(validationError);
+    //   showErrorToast({
+    //     title: "Check your details",
+    //     message: validationError,
+    //   });
+    //   return;
+    // }
 
-    if (!EMAIL_RULE.test(trimmedEmail)) {
-      setError("Please enter a valid email address.");
-      showErrorToast({
-        title: "Invalid email",
-        message: "Please check the email address and try again.",
-      });
-      return;
-    }
+    // const authMode = getRecoveryMode(identifier);
 
-    setError(undefined);
-    dispatch(forgotAccountRequestAction({ email: trimmedEmail }));
+    // if (!authMode) {
+    //   return;
+    // }
+
+    // const normalizedIdentifier = getNormalizedIdentifier(identifier, authMode);
+
+    // setError(undefined);
+    // setSubmittedRecovery({
+    //   authMode,
+    //   identifier: normalizedIdentifier,
+    // });
+    // dispatch(
+    //   forgotAccountRequestAction(
+    //     authMode === "email"
+    //       ? { email: normalizedIdentifier }
+    //       : { mobile: normalizedIdentifier }
+    //   )
+    // );
+
+    const recoveryMode = {
+      authMode: "Email",
+      identifier: "",
+    };
+
+    navigation.navigate("ResetPassword", recoveryMode);
   };
+
+
+  function BrandMark(): React.JSX.Element {
+    return (
+      <View style={styles.brandMarkOuter}>
+        <View style={styles.brandMarkInner} />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["left", "right", "bottom"]}>
@@ -227,9 +326,11 @@ function ForgotPasswordScreen(): React.JSX.Element {
         bounces={false}
         keyboardShouldPersistTaps="handled"
       >
+        {/* <View style={styles.hero}>
+          <BrandMark />
+        </View> */}
         <View style={styles.card}>
           <PatternHeader />
-
           <View style={styles.content}>
             <AuthBackHeader
               title="Forgot Password"
@@ -237,20 +338,21 @@ function ForgotPasswordScreen(): React.JSX.Element {
             />
 
             <Text style={styles.subtitle}>
-              Enter the email address linked to your account and we&apos;ll help
-              you reset your password.
+              Enter the email address or phone number linked to your account and
+              we&apos;ll help you reset your password.
             </Text>
 
             <ForgotPasswordField
-              label="Email"
-              value={email}
+              label="Email or phone number"
+              value={identifier}
               onChangeText={(text) => {
-                setEmail(text);
+                setIdentifier(text);
                 if (error) {
                   setError(undefined);
                 }
               }}
-              placeholder="Enter your email address"
+              placeholder="Enter your email or phone number"
+              keyboardType={getKeyboardType(identifier)}
               error={error}
             />
 

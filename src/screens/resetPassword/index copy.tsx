@@ -293,7 +293,7 @@ function ResetPasswordScreen({
   const [newPassword, setNewPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [formErrors, setFormErrors] = useState<ResetPasswordErrors>({});
-  const { email } = route.params;
+  const { identifier } = route.params;
 
   const {
     loading: isresetPasswordLoading,
@@ -345,7 +345,11 @@ function ResetPasswordScreen({
 
     setFormErrors({});
     dispatch(
-      resetAccountRequestAction({ email, otp, new_password: newPassword })
+      resetAccountRequestAction({
+        email: identifier,
+        otp,
+        new_password: newPassword,
+      })
     );
   };
 

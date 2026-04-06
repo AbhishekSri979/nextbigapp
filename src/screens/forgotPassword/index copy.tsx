@@ -15,7 +15,10 @@ import type { AuthNavigationProp } from "../../navigation";
 import { colors } from "../../theme/colors";
 import { styles } from "./styles";
 import { useDispatch } from "react-redux";
-import { forgotAccountRequestAction, resetStateAction } from "../../store/modules/users/actions";
+import {
+  forgotAccountRequestAction,
+  resetStateAction,
+} from "../../store/modules/users/actions";
 import { useAppSelector } from "../../store/hooks";
 
 type ForgotPasswordFieldProps = {
@@ -33,9 +36,9 @@ function hexToRgba(hexColor: string, opacity: number): string {
   const sixDigitHex =
     normalizedHex.length === 3
       ? normalizedHex
-        .split("")
-        .map((character) => `${character}${character}`)
-        .join("")
+          .split("")
+          .map((character) => `${character}${character}`)
+          .join("")
       : normalizedHex;
 
   const red = Number.parseInt(sixDigitHex.slice(0, 2), 16);
@@ -170,15 +173,18 @@ function ForgotPasswordScreen(): React.JSX.Element {
   } = useAppSelector((state) => state.users);
 
   useEffect(() => {
-  if (forgotPasswordStatus === "success") {
-    showSuccessToast({
-      title: "Successfully sent.",
-      message: forgotPasswordMessage ?? "OTP sent successfully.",
-    });
-    navigation.navigate("ResetPassword", { email });
-    dispatch(resetStateAction());
-  }
-}, [forgotPasswordStatus, forgotPasswordMessage, navigation, dispatch]);
+    if (forgotPasswordStatus === "success") {
+      showSuccessToast({
+        title: "Successfully sent.",
+        message: forgotPasswordMessage ?? "OTP sent successfully.",
+      });
+      navigation.navigate("ResetPassword", {
+        identifier: email,
+        authMode: "email",
+      });
+      dispatch(resetStateAction());
+    }
+  }, [forgotPasswordStatus, forgotPasswordMessage, navigation, dispatch]);
 
   const handleBackToLogin = () => {
     if (navigation.canGoBack()) {

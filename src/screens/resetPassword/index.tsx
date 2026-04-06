@@ -70,6 +70,33 @@ function hexToRgba(hexColor: string, opacity: number): string {
   return `rgba(${red}, ${green}, ${blue}, ${opacity})`;
 }
 
+function getDeliveryLabel(
+  authMode: AuthStackParamList["OtpScreen"]["authMode"]
+): string {
+  return authMode === "email" ? "email address" : "phone number";
+}
+
+function maskIdentifier(
+  identifier: string,
+  authMode: AuthStackParamList["OtpScreen"]["authMode"]
+): string {
+  if (authMode === "email") {
+    const [localPart = "", domainPart = ""] = identifier.split("@");
+    const visibleLocalPart = localPart.slice(0, 2);
+    const hiddenLocalPart = "*".repeat(Math.max(localPart.length - 2, 1));
+
+    return `${visibleLocalPart}${hiddenLocalPart}@${domainPart}`;
+  }
+
+  if (identifier.length <= 4) {
+    return identifier;
+  }
+
+  return `${identifier.slice(0, 2)}${"*".repeat(
+    Math.max(identifier.length - 4, 1)
+  )}${identifier.slice(-2)}`;
+}
+
 const HEADER_GLOW = hexToRgba(colors.white, 0.15);
 const HEADER_SOFT_LIGHT = hexToRgba(colors.white, 0.1);
 const HEADER_DARK_ACCENT = "rgba(0, 0, 0, 0.08)";
@@ -293,12 +320,11 @@ function ResetPasswordScreen({
   const [newPassword, setNewPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [formErrors, setFormErrors] = useState<ResetPasswordErrors>({});
-  const { email } = route.params;
+  const { identifier, authMode } = route.params;
 
   const {
     loading: isresetPasswordLoading,
     status: resetPasswordStatus,
-    error: resetPasswordError,
     message: resetPasswordMessage,
   } = useAppSelector((state) => state.users);
 
@@ -345,7 +371,11 @@ function ResetPasswordScreen({
 
     setFormErrors({});
     dispatch(
-      resetAccountRequestAction({ email, otp, new_password: newPassword })
+      resetAccountRequestAction(
+        authMode === "email"
+          ? { email: identifier, otp, new_password: newPassword }
+          : { mobile: identifier, otp, new_password: newPassword }
+      )
     );
   };
 
@@ -369,8 +399,9 @@ function ResetPasswordScreen({
             />
 
             <Text style={styles.subtitle}>
-              Enter the 6-digit code sent to your email address and create a new
-              password for your account.
+              Enter the 6-digit code sent to your {getDeliveryLabel(authMode)} (
+              {maskIdentifier(identifier, authMode)}) and create a new password
+              for your account.
             </Text>
 
             <View style={styles.formGroup}>
@@ -429,7 +460,7 @@ function ResetPasswordScreen({
 
             <CustomButton
               title="Reset Password"
-              onPress={handleResetPassword}
+              // onPress={handleResetPassword}
               style={styles.submitButton}
             />
           </View>

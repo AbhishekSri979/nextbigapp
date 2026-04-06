@@ -205,7 +205,7 @@ function LoginScreen(): React.JSX.Element {
               styles.googleButton,
               pressed ? styles.googleButtonPressed : null,
             ]}
-            onPress={handleGoogleLogin}
+            // onPress={handleGoogleLogin}
             accessibilityRole="button"
             accessibilityLabel="Continue with Google"
           >
