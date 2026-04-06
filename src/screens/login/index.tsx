@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Image,
   Pressable,
@@ -8,529 +8,220 @@ import {
   TextInput,
   View,
 } from "react-native";
-import type { TextInputProps } from "react-native";
+import type { KeyboardTypeOptions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
 
 import {
-  AppLoader,
   CustomButton,
-  EyeIcon,
-  LockIcon,
-  MailIcon,
   showErrorToast,
   showSuccessToast,
 } from "../../components/common";
-import { colors } from "../../theme/colors";
+import type { AuthNavigationProp } from "../../navigation";
 import { images } from "../../theme/images";
 import { styles } from "./styles";
-import { useNavigation } from "@react-navigation/native";
-import type {
-  AuthNavigationProp,
-  RootNavigationProp,
-} from "../../navigation";
-import {
-  loginRequestAction,
-  resetStateAction,
-} from "../../store/modules/users/actions";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-
-type LoginFieldProps = {
-  icon: "mail" | "lock";
-  label: string;
-  value: string;
-  onChangeText: (text: string) => void;
-  placeholder?: string;
-  secureTextEntry?: boolean;
-  keyboardType?: TextInputProps["keyboardType"];
-  autoCapitalize?: TextInputProps["autoCapitalize"];
-  rightAccessory?: React.ReactNode;
-  error?: string;
-};
-
-type LoginValues = {
-  email: string;
-  password: string;
-};
-
-type LoginErrors = Partial<Record<keyof LoginValues, string>>;
-
-type SocialProvider = {
-  key: string;
-  label: string;
-  icon: number;
-};
+import { colors } from "../../theme/colors";
 
 const EMAIL_RULE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_DIGIT_MIN = 10;
+const PHONE_DIGIT_MAX = 15;
+const LOGIN_HEADER_COLOR = colors.primary;
 
-function hexToRgba(hexColor: string, opacity: number): string {
-  const normalizedHex = hexColor.replace("#", "");
-  const sixDigitHex =
-    normalizedHex.length === 3
-      ? normalizedHex
-        .split("")
-        .map((character) => `${character}${character}`)
-        .join("")
-      : normalizedHex;
+type AuthMode = "email" | "phone";
 
-  const red = Number.parseInt(sixDigitHex.slice(0, 2), 16);
-  const green = Number.parseInt(sixDigitHex.slice(2, 4), 16);
-  const blue = Number.parseInt(sixDigitHex.slice(4, 6), 16);
-
-  return `rgba(${red}, ${green}, ${blue}, ${opacity})`;
-}
-
-const HEADER_GLOW = hexToRgba(colors.white, 0.15);
-const HEADER_SOFT_LIGHT = hexToRgba(colors.white, 0.1);
-const HEADER_DARK_ACCENT = "rgba(0, 0, 0, 0.08)";
-const REMEMBERED_LOGIN_KEY = "@eventGearApp/rememberedLogin";
-const SOCIAL_PROVIDERS: SocialProvider[] = [
-  {
-    key: "google",
-    label: "Google",
-    icon: images.google,
-  },
-  {
-    key: "facebook",
-    label: "Facebook",
-    icon: images.facebook,
-  },
-  {
-    key: "linkedin",
-    label: "LinkedIn",
-    icon: images.linkedin,
-  },
-];
-
-function PatternHeader(): React.JSX.Element {
+function BrandMark(): React.JSX.Element {
   return (
-    <View style={styles.header}>
-      <View style={{ ...styles.headerOrbLarge, backgroundColor: HEADER_GLOW, }} />
-      <View style={{ ...styles.headerOrbSmall, backgroundColor: HEADER_DARK_ACCENT, }} />
-      <View style={{ ...styles.headerRibbon, backgroundColor: HEADER_SOFT_LIGHT, }} />
-      <View style={{ ...styles.headerArc, borderColor: HEADER_SOFT_LIGHT, }} />
-      <View style={{ ...styles.headerDotRow, backgroundColor: HEADER_GLOW, }}>
-        <View style={{ ...styles.headerDot, backgroundColor: hexToRgba(colors.white, 0.5), }} />
-        <View style={{ ...styles.headerDot, backgroundColor: hexToRgba(colors.white, 0.5), }} />
-        <View style={{ ...styles.headerDot, backgroundColor: hexToRgba(colors.white, 0.5), }} />
-      </View>
-      <View style={{ ...styles.logoAura, backgroundColor: HEADER_SOFT_LIGHT, }} />
-
-      <View style={{ ...styles.logoBadge, borderColor: hexToRgba(colors.white, 0.35), }}>
-        <View style={{ ...styles.logoMark }}>
-          <View style={{ ...styles.logoCircle }} />
-          <View style={{ ...styles.logoCut }} />
-        </View>
-      </View>
+    <View style={styles.brandMarkOuter}>
+      <View style={styles.brandMarkInner} />
     </View>
   );
 }
 
-function FieldIcon({
-  icon,
-}: Pick<LoginFieldProps, "icon">): React.JSX.Element {
-  if (icon === "lock") {
-    return <LockIcon />;
-  }
-
-  return <MailIcon />;
+function normalizePhoneDigits(value: string): string {
+  return value.replace(/\D/g, "");
 }
 
-function LoginField({
-  icon,
-  label,
-  value,
-  onChangeText,
-  placeholder,
-  secureTextEntry,
-  keyboardType,
-  autoCapitalize,
-  rightAccessory,
-  error,
-}: LoginFieldProps): React.JSX.Element {
-  return (
-    <View style={styles.fieldBlock}>
-      <View style={[styles.fieldCard, error ? styles.fieldCardError : null]}>
-        <Text style={styles.fieldLabel}>{label}</Text>
-        <View style={styles.fieldRow}>
-          <View style={styles.fieldIconWrap}>
-            <FieldIcon icon={icon} />
-          </View>
-          <View style={styles.fieldControl}>
-            <TextInput
-              style={styles.fieldInput}
-              value={value}
-              onChangeText={onChangeText}
-              placeholder={placeholder}
-              placeholderTextColor="#C1C4CC"
-              secureTextEntry={secureTextEntry}
-              keyboardType={keyboardType}
-              autoCapitalize={autoCapitalize}
-              selectionColor={colors.primary}
-            />
-          </View>
-          {rightAccessory ? (
-            <View style={styles.fieldAccessory}>{rightAccessory}</View>
-          ) : null}
-        </View>
-      </View>
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
-    </View>
-  );
-}
+function getAuthMode(value: string): AuthMode | null {
+  const trimmedValue = value.trim();
+  const phoneDigits = normalizePhoneDigits(trimmedValue);
 
-function SocialLoginButton({
-  provider,
-  onPress,
-}: {
-  provider: SocialProvider;
-  onPress: () => void;
-}): React.JSX.Element {
-  return (
-    <Pressable
-      style={({ pressed }) => [
-        styles.socialButton,
-        pressed ? styles.socialButtonPressed : null,
-      ]}
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={`Continue with ${provider.label}`}
-    >
-      <Image
-        source={provider.icon}
-        style={styles.socialIconImage}
-        resizeMode="contain"
-      />
-    </Pressable>
-  );
-}
-
-function getValidationErrors(values: LoginValues): LoginErrors {
-  const nextErrors: LoginErrors = {};
-
-  if (!values.email.trim()) {
-    nextErrors.email = "Please enter your email address.";
-  } else if (!EMAIL_RULE.test(values.email.trim())) {
-    nextErrors.email = "Please enter a valid email address.";
+  if (EMAIL_RULE.test(trimmedValue)) {
+    return "email";
   }
 
-  if (!values.password) {
-    nextErrors.password = "Please enter your password.";
+  if (
+    phoneDigits.length >= PHONE_DIGIT_MIN &&
+    phoneDigits.length <= PHONE_DIGIT_MAX
+  ) {
+    return "phone";
   }
 
-  return nextErrors;
+  return null;
+}
+
+function getValidationError(value: string): string | undefined {
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue) {
+    return "Please enter your email address or phone number.";
+  }
+
+  if (getAuthMode(trimmedValue)) {
+    return undefined;
+  }
+
+  return "Please enter a valid email address or phone number.";
+}
+
+function getKeyboardType(value: string): KeyboardTypeOptions {
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue) {
+    return "email-address";
+  }
+
+  if (trimmedValue.includes("@")) {
+    return "email-address";
+  }
+
+  return "phone-pad";
 }
 
 function LoginScreen(): React.JSX.Element {
   const navigation = useNavigation<AuthNavigationProp<"Login">>();
-  const dispatch = useAppDispatch();
-  const {
-    loading: isLoginLoading,
-    status: loginStatus,
-    error: loginError,
-    message: loginMessage,
-  } = useAppSelector((state) => state.users);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [formErrors, setFormErrors] = useState<LoginErrors>({});
-  const [hasLoadedRememberedCredentials, setHasLoadedRememberedCredentials] =
-    useState(false);
+  const [identifier, setIdentifier] = useState("");
+  const [error, setError] = useState<string | undefined>();
 
-  useEffect(() => {
-    let isActive = true;
+  const handleIdentifierChange = (text: string) => {
+    setIdentifier(text);
 
-    const loadRememberedCredentials = async () => {
-      try {
-        const storedCredentials = await AsyncStorage.getItem(
-          REMEMBERED_LOGIN_KEY
-        );
-
-        if (!storedCredentials) {
-          return;
-        }
-
-        const parsedCredentials = JSON.parse(storedCredentials) as
-          | Partial<LoginValues>
-          | null;
-
-        if (!isActive) {
-          return;
-        }
-
-        if (parsedCredentials?.email && parsedCredentials?.password) {
-          setEmail(parsedCredentials.email);
-          setPassword(parsedCredentials.password);
-          setRememberMe(true);
-          return;
-        }
-
-        await AsyncStorage.removeItem(REMEMBERED_LOGIN_KEY);
-      } catch (error) {
-        console.warn("Unable to load remembered login details.", error);
-      } finally {
-        if (isActive) {
-          setHasLoadedRememberedCredentials(true);
-        }
-      }
-    };
-
-    loadRememberedCredentials();
-
-    return () => {
-      isActive = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!hasLoadedRememberedCredentials) {
-      return;
+    if (error) {
+      setError(undefined);
     }
+  };
 
-    const syncRememberedCredentials = async () => {
-      try {
-        if (!rememberMe) {
-          await AsyncStorage.removeItem(REMEMBERED_LOGIN_KEY);
-          return;
-        }
+  const handleSendOtp = () => {
+    const validationError = getValidationError(identifier);
 
-        await AsyncStorage.setItem(
-          REMEMBERED_LOGIN_KEY,
-          JSON.stringify({
-            email: email.trim(),
-            password,
-          })
-        );
-      } catch (error) {
-        console.warn("Unable to update remembered login details.", error);
-      }
-    };
-
-    syncRememberedCredentials();
-  }, [email, hasLoadedRememberedCredentials, password, rememberMe]);
-
-  useEffect(() => {
-    const rootNavigation = navigation.getParent<RootNavigationProp>();
-
-    if (loginStatus === "success") {
-      showSuccessToast({
-        title: "Login successful",
-        message: loginMessage ?? "Welcome back to EventGear.",
-      });
-      dispatch(resetStateAction());
-
-      if (rootNavigation) {
-        rootNavigation.reset({
-          index: 0,
-          routes: [
-            {
-              name: "AppStack",
-              params: {
-                screen: "Home",
-              },
-            },
-          ],
-        });
-      }
-
-      return;
-    }
-
-    if (loginStatus === "error") {
+    if (validationError) {
+      setError(validationError);
       showErrorToast({
-        title: "Login failed",
-        message: loginError ?? "Please try again.",
+        title: "Check your details",
+        message: validationError,
       });
-      dispatch(resetStateAction());
-    }
-  }, [dispatch, loginError, loginMessage, loginStatus, navigation]);
-
-  const updateField = (field: keyof LoginValues, value: string) => {
-    if (field === "email") {
-      setEmail(value);
-    } else {
-      setPassword(value);
+      return;
     }
 
-    setFormErrors((currentErrors) => {
-      if (!currentErrors[field]) {
-        return currentErrors;
-      }
+    const authMode = getAuthMode(identifier);
 
-      const nextErrors = { ...currentErrors };
+    if (!authMode) {
+      return;
+    }
 
-      delete nextErrors[field];
-
-      return nextErrors;
+    showSuccessToast({
+      title: authMode === "email" ? "Email OTP ready" : "Phone OTP ready",
+      message:
+        authMode === "email"
+          ? "The UI is ready for email OTP login. Connect your OTP API to send the code."
+          : "The UI is ready for phone OTP login. Connect your OTP API to send the code.",
     });
   };
 
-  const handleLogin = () => {
-    const nextErrors = getValidationErrors({ email, password });
-
-    setFormErrors(nextErrors);
-
-    if (Object.keys(nextErrors).length > 0) {
-      showErrorToast({
-        title: "Check your details",
-        message: "Please correct the highlighted fields and try again.",
-      });
-      return;
-    }
-
-    dispatch(
-      loginRequestAction({
-        email: email.trim(),
-        password,
-      })
-    );
-  };
-
-  const handleForgotPassword = () => {
-    navigation.navigate("ForgotPassword");
+  const handleGoogleLogin = () => {
+    showSuccessToast({
+      title: "Google login ready",
+      message:
+        "The Google sign-in button is added. Connect your Google auth setup to complete the login flow.",
+    });
   };
 
   const handleRegister = () => {
     navigation.navigate("Register");
   };
 
-  const handleSocialLogin = (provider: string) => {
-    showErrorToast({
-      title: `${provider} login unavailable`,
-      message: `${provider} login functionality is not available yet.`,
-    });
-  };
-
   return (
-    <SafeAreaView style={styles.safeArea} edges={["left", "right", "bottom"]}>
+    <SafeAreaView style={styles.safeArea}>
       <StatusBar
         barStyle="light-content"
-        backgroundColor={colors.primary}
+        backgroundColor={LOGIN_HEADER_COLOR}
       />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        bounces={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.card}>
-          <PatternHeader />
+        <View style={styles.hero}>
+          <BrandMark />
+          <Text style={styles.brandTitle}>Event Gear</Text>
+          <Text style={styles.brandSubtitle}>
+            Rent everything for your next event
+          </Text>
+        </View>
 
-          <View style={styles.content}>
-            <Text style={styles.title}>Login</Text>
+        <View style={styles.content}>
+          <Text style={styles.fieldLabel}>Email or phone number</Text>
 
-            <View style={styles.formGroup}>
-              <LoginField
-                icon="mail"
-                label="Email"
-                value={email}
-                onChangeText={(text) => updateField("email", text)}
-                placeholder="Enter your email address"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                error={formErrors.email}
-              />
-
-              <LoginField
-                icon="lock"
-                label="Password"
-                value={password}
-                onChangeText={(text) => updateField("password", text)}
-                placeholder="Enter your password"
-                secureTextEntry={!showPassword}
-                rightAccessory={
-                  <Pressable
-                    onPress={() => setShowPassword((current) => !current)}
-                    hitSlop={10}
-                    style={[
-                      styles.passwordToggleButton,
-                      showPassword ? styles.passwordToggleButtonActive : null,
-                    ]}
-                    accessibilityRole="button"
-                    accessibilityLabel={
-                      showPassword ? "Hide password" : "Show password"
-                    }
-                  >
-                    <EyeIcon
-                      color={showPassword ? colors.primary : "#7C88A1"}
-                      isVisible={showPassword}
-                    />
-                  </Pressable>
-                }
-                error={formErrors.password}
-              />
-            </View>
-
-            <View style={styles.optionsRow}>
-              <Pressable
-                style={styles.rememberRow}
-                onPress={() => setRememberMe((current) => !current)}
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: rememberMe }}
-                accessibilityLabel="Remember me"
-              >
-                <View
-                  style={[
-                    styles.checkbox,
-                    rememberMe ? styles.checkboxChecked : null,
-                  ]}
-                >
-                  {rememberMe ? <View style={styles.checkboxCheck} /> : null}
-                </View>
-                <Text style={styles.rememberText}>Remember me</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={handleForgotPassword}
-                accessibilityRole="button"
-                accessibilityLabel="Forgot password"
-              >
-                <Text style={styles.forgotText}>Forgot Password?</Text>
-              </Pressable>
-            </View>
-
-            <CustomButton
-              title="Login"
-              onPress={handleLogin}
-              disabled={isLoginLoading}
-              style={styles.loginButton}
+          <View
+            style={[styles.inputShell, error ? styles.inputShellError : null]}
+          >
+            <TextInput
+              style={styles.input}
+              value={identifier}
+              onChangeText={handleIdentifierChange}
+              placeholder="XXXXXXXXXX"
+              placeholderTextColor="#8B90A4"
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType={getKeyboardType(identifier)}
+              selectionColor={LOGIN_HEADER_COLOR}
             />
+          </View>
 
-            <View style={styles.socialSection}>
-              <View style={styles.socialDivider}>
-                <View style={styles.socialDividerLine} />
-                <Text style={styles.socialDividerText}>Or continue with</Text>
-                <View style={styles.socialDividerLine} />
-              </View>
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-              <View style={styles.socialButtons}>
-                {SOCIAL_PROVIDERS.map((provider) => (
-                  <SocialLoginButton
-                    key={provider.key}
-                    provider={provider}
-                    onPress={() => handleSocialLogin(provider.label)}
-                  />
-                ))}
-              </View>
-            </View>
+          <Text style={styles.helperText}>
+            {"We'll send a one-time code to verify you"}
+          </Text>
 
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>Don't have any account? </Text>
-              <Pressable onPress={handleRegister}>
-                <Text style={styles.footerLink}>Sign Up</Text>
-              </Pressable>
-            </View>
+          <CustomButton
+            title="Send OTP"
+            onPress={handleSendOtp}
+            style={styles.primaryButton}
+            textStyle={styles.primaryButtonText}
+          />
+
+          <View style={styles.dividerRow}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>or</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          <Pressable
+            style={({ pressed }) => [
+              styles.googleButton,
+              pressed ? styles.googleButtonPressed : null,
+            ]}
+            onPress={handleGoogleLogin}
+            accessibilityRole="button"
+            accessibilityLabel="Continue with Google"
+          >
+            <Image
+              source={images.google}
+              style={styles.googleIcon}
+              resizeMode="contain"
+            />
+            <Text style={styles.googleButtonText}>Continue with Google</Text>
+          </Pressable>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>New here? </Text>
+            <Pressable onPress={handleRegister}>
+              <Text style={styles.footerLink}>Create account</Text>
+            </Pressable>
           </View>
         </View>
       </ScrollView>
-
-      <AppLoader
-        visible={isLoginLoading}
-        title="Signing you in..."
-        subtitle="Please wait while we verify your account."
-      />
     </SafeAreaView>
   );
 }
