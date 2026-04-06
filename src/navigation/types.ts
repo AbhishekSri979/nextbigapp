@@ -3,11 +3,19 @@ import type {
   NavigatorScreenParams,
 } from "@react-navigation/native";
 
+export type OtpDeliveryMode = "email" | "phone";
+
 export type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
   ForgotPassword: undefined;
-  ResetPassword: undefined;
+  ResetPassword: {
+    email: string;
+  };
+  OtpScreen: {
+    identifier: string;
+    authMode: OtpDeliveryMode;
+  };
 };
 
 export type AppStackParamList = {
@@ -20,15 +28,15 @@ export type RootStackParamList = {
 };
 
 export type AuthNavigationProp<
-  RouteName extends keyof AuthStackParamList = keyof AuthStackParamList,
+  RouteName extends keyof AuthStackParamList = keyof AuthStackParamList
 > = NavigationProp<AuthStackParamList, RouteName>;
 
 export type AppNavigationProp<
-  RouteName extends keyof AppStackParamList = keyof AppStackParamList,
+  RouteName extends keyof AppStackParamList = keyof AppStackParamList
 > = NavigationProp<AppStackParamList, RouteName>;
 
 export type RootNavigationProp<
-  RouteName extends keyof RootStackParamList = keyof RootStackParamList,
+  RouteName extends keyof RootStackParamList = keyof RootStackParamList
 > = NavigationProp<RootStackParamList, RouteName>;
 
 declare global {

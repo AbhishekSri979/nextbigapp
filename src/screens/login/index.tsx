@@ -5,7 +5,6 @@ import {
   ScrollView,
   StatusBar,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import type { KeyboardTypeOptions } from "react-native";
@@ -14,6 +13,7 @@ import { useNavigation } from "@react-navigation/native";
 
 import {
   CustomButton,
+  CustomTextInput,
   showErrorToast,
   showSuccessToast,
 } from "../../components/common";
@@ -118,12 +118,9 @@ function LoginScreen(): React.JSX.Element {
       return;
     }
 
-    showSuccessToast({
-      title: authMode === "email" ? "Email OTP ready" : "Phone OTP ready",
-      message:
-        authMode === "email"
-          ? "The UI is ready for email OTP login. Connect your OTP API to send the code."
-          : "The UI is ready for phone OTP login. Connect your OTP API to send the code.",
+    navigation.navigate("OtpScreen", {
+      identifier: identifier.trim(),
+      authMode,
     });
   };
 
@@ -150,6 +147,7 @@ function LoginScreen(): React.JSX.Element {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        bounces={false}
       >
         <View style={styles.hero}>
           <BrandMark />
@@ -162,27 +160,32 @@ function LoginScreen(): React.JSX.Element {
         <View style={styles.content}>
           <Text style={styles.fieldLabel}>Email or phone number</Text>
 
-          <View
-            style={[styles.inputShell, error ? styles.inputShellError : null]}
-          >
-            <TextInput
-              style={styles.input}
-              value={identifier}
-              onChangeText={handleIdentifierChange}
-              placeholder="XXXXXXXXXX"
-              placeholderTextColor="#8B90A4"
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType={getKeyboardType(identifier)}
-              selectionColor={LOGIN_HEADER_COLOR}
-            />
-          </View>
-
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          <CustomTextInput
+            value={identifier}
+            onChangeText={handleIdentifierChange}
+            placeholder="Enter your email or phone number"
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType={getKeyboardType(identifier)}
+            selectionColor={LOGIN_HEADER_COLOR}
+            error={error}
+            style={styles.input}
+            containerStyle={styles.inputContainer}
+            errorTextStyle={styles.errorText}
+          />
 
           <Text style={styles.helperText}>
             {"We'll send a one-time code to verify you"}
           </Text>
+
+          <Pressable
+            onPress={() => navigation.navigate("ForgotPassword")}
+            accessibilityRole="button"
+            accessibilityLabel="Forgot password"
+            style={styles.forgotPasswordButton}
+          >
+            <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+          </Pressable>
 
           <CustomButton
             title="Send OTP"
@@ -214,12 +217,12 @@ function LoginScreen(): React.JSX.Element {
             <Text style={styles.googleButtonText}>Continue with Google</Text>
           </Pressable>
 
-          <View style={styles.footer}>
+          {/* <View style={styles.footer}>
             <Text style={styles.footerText}>New here? </Text>
             <Pressable onPress={handleRegister}>
               <Text style={styles.footerLink}>Create account</Text>
             </Pressable>
-          </View>
+          </View> */}
         </View>
       </ScrollView>
     </SafeAreaView>

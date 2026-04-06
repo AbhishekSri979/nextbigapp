@@ -13,7 +13,6 @@ const LOGIN_HEADER_COLOR = colors.primary;
 export const styles = StyleSheet.create({
   safeArea: {
     backgroundColor: colors.primary,
-    // flex: 1,
   },
   scrollContent: {
     backgroundColor: "#FFFFFF",
@@ -22,9 +21,9 @@ export const styles = StyleSheet.create({
   hero: {
     alignItems: "center",
     backgroundColor: colors.primary,
+    flex: 1,
     paddingBottom: 46,
-    paddingTop: 40,
-    flex:1,
+    paddingTop:50,
   },
   brandMarkOuter: {
     alignItems: "center",
@@ -63,13 +62,13 @@ export const styles = StyleSheet.create({
     textAlign: "center",
   },
   content: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 40,
     flex: 1,
+    marginTop: -28,
     paddingBottom: 40,
     paddingHorizontal: 28,
-    paddingTop: 30,
-    borderTopLeftRadius:40,
-    marginTop: -28,
-    backgroundColor: "#FFFFFF",
+    paddingTop: 50,
   },
   fieldLabel: {
     color: "#2D3450",
@@ -77,27 +76,25 @@ export const styles = StyleSheet.create({
     fontSize: 17,
     marginBottom: 12,
   },
-  inputShell: {
+  inputContainer: {
+    marginBottom: 0,
+  },
+  input: {
     backgroundColor: "#FFFFFF",
     borderColor: colors.primary,
     borderRadius: 18,
     borderWidth: 2,
-    elevation: 2,
-    justifyContent: "center",
-    minHeight: 60,
-    paddingHorizontal: 20,
-  },
-  inputShellError: {
-    borderColor: "#D66060",
-  },
-  input: {
     color: "#3B4157",
+    elevation: 2,
     fontFamily: brandFontFamily,
     fontSize: 17,
-    paddingVertical: 0,
+    minHeight: 60,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
   errorText: {
     color: "#D66060",
+    fontFamily: brandFontFamily,
     fontSize: 13,
     marginTop: 8,
   },
@@ -106,8 +103,17 @@ export const styles = StyleSheet.create({
     fontFamily: brandFontFamily,
     fontSize: 15,
     lineHeight: 22,
-    marginBottom: 24,
     marginTop: 12,
+  },
+  forgotPasswordButton: {
+    alignSelf: "flex-end",
+    marginBottom: 24,
+    marginTop: 10,
+  },
+  forgotPasswordText: {
+    color: LOGIN_HEADER_COLOR,
+    fontFamily: brandFontFamily,
+    fontSize: 15,
   },
   primaryButton: {
     backgroundColor: LOGIN_HEADER_COLOR,
