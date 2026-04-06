@@ -31,7 +31,7 @@ import type {
 } from "../../navigation";
 import {
   loginRequestAction,
-  resetLoginStateAction,
+  resetStateAction,
 } from "../../store/modules/users/actions";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 
@@ -318,7 +318,7 @@ function LoginScreen(): React.JSX.Element {
         title: "Login successful",
         message: loginMessage ?? "Welcome back to EventGear.",
       });
-      dispatch(resetLoginStateAction());
+      dispatch(resetStateAction());
 
       if (rootNavigation) {
         rootNavigation.reset({
@@ -342,7 +342,7 @@ function LoginScreen(): React.JSX.Element {
         title: "Login failed",
         message: loginError ?? "Please try again.",
       });
-      dispatch(resetLoginStateAction());
+      dispatch(resetStateAction());
     }
   }, [dispatch, loginError, loginMessage, loginStatus, navigation]);
 

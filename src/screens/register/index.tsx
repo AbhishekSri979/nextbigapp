@@ -27,7 +27,7 @@ import { colors } from "../../theme/colors";
 import { styles } from "./styles";
 import {
   createUserAccountRequestAction,
-  resetCreateUserAccountStateAction,
+  resetStateAction,
 } from "../../store/modules/users/actions";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import type { AuthNavigationProp } from "../../navigation";
@@ -347,7 +347,7 @@ function RegisterScreen(): React.JSX.Element {
       setFormValues(INITIAL_FORM_VALUES);
       setSelectedDob(null);
       setFormErrors({});
-      dispatch(resetCreateUserAccountStateAction());
+      dispatch(resetStateAction());
       handleLogin();
       return;
     }
@@ -357,7 +357,7 @@ function RegisterScreen(): React.JSX.Element {
         title: "Registration failed",
         message: registrationError ?? "Please try again.",
       });
-      dispatch(resetCreateUserAccountStateAction());
+      dispatch(resetStateAction());
     }
   }, [dispatch, registrationError, registrationMessage, registrationStatus]);
 

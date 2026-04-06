@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView, StatusBar, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 
 import {
+  AppLoader,
   AuthBackHeader,
   CustomButton,
   MailIcon,
@@ -13,6 +14,9 @@ import {
 import type { AuthNavigationProp } from "../../navigation";
 import { colors } from "../../theme/colors";
 import { styles } from "./styles";
+import { useDispatch } from "react-redux";
+import { forgotAccountRequestAction, resetStateAction } from "../../store/modules/users/actions";
+import { useAppSelector } from "../../store/hooks";
 
 type ForgotPasswordFieldProps = {
   label: string;
@@ -29,9 +33,9 @@ function hexToRgba(hexColor: string, opacity: number): string {
   const sixDigitHex =
     normalizedHex.length === 3
       ? normalizedHex
-          .split("")
-          .map((character) => `${character}${character}`)
-          .join("")
+        .split("")
+        .map((character) => `${character}${character}`)
+        .join("")
       : normalizedHex;
 
   const red = Number.parseInt(sixDigitHex.slice(0, 2), 16);
@@ -154,9 +158,27 @@ function ForgotPasswordField({
 }
 
 function ForgotPasswordScreen(): React.JSX.Element {
+  const dispatch = useDispatch();
   const navigation = useNavigation<AuthNavigationProp<"ForgotPassword">>();
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | undefined>();
+  const {
+    loading: isForgotPasswordLoading,
+    status: forgotPasswordStatus,
+    error: forgotPasswordError,
+    message: forgotPasswordMessage,
+  } = useAppSelector((state) => state.users);
+
+  useEffect(() => {
+  if (forgotPasswordStatus === "success") {
+    showSuccessToast({
+      title: "Successfully sent.",
+      message: forgotPasswordMessage ?? "OTP sent successfully.",
+    });
+    navigation.navigate("ResetPassword", { email });
+    dispatch(resetStateAction());
+  }
+}, [forgotPasswordStatus, forgotPasswordMessage, navigation, dispatch]);
 
   const handleBackToLogin = () => {
     if (navigation.canGoBack()) {
@@ -192,11 +214,7 @@ function ForgotPasswordScreen(): React.JSX.Element {
     }
 
     setError(undefined);
-    showSuccessToast({
-      title: "Reset link sent",
-      message:
-        "If an account exists for this email, password reset instructions will be sent.",
-    });
+    dispatch(forgotAccountRequestAction({ email: trimmedEmail }));
   };
 
   return (
@@ -244,6 +262,11 @@ function ForgotPasswordScreen(): React.JSX.Element {
           </View>
         </View>
       </ScrollView>
+      <AppLoader
+        visible={isForgotPasswordLoading}
+        title="Sending OTP..."
+        subtitle="Please wait while we send the verification code."
+      />
     </SafeAreaView>
   );
 }

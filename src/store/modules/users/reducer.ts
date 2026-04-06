@@ -1,3 +1,4 @@
+import { showErrorToast, showSuccessToast } from '../../../components/common';
 import { ApIConstant } from './actionTypes';
 
 interface UsersState {
@@ -57,7 +58,7 @@ function usersReducer(
         status: 'error',
       };
 
-       case ApIConstant.API_LOGIN_LOAD:
+    case ApIConstant.API_LOGIN_LOAD:
       return {
         ...state,
         loading: true,
@@ -85,8 +86,68 @@ function usersReducer(
         status: 'error',
       };
 
-    case ApIConstant.API_CREATE_USER_ACCOUNT_RESET:
-    case ApIConstant.API_LOGIN_RESET:
+    case ApIConstant.API_FORGOT_ACCOUNT_LOAD:
+      return {
+        ...state,
+        loading: true,
+        error: null,
+        message: null,
+        status: 'loading',
+      };
+
+    case ApIConstant.API_FORGOT_ACCOUNT_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        error: null,
+        message: action.message ?? null,
+        status: 'success',
+      };
+
+    case ApIConstant.API_FORGOT_ACCOUNT_ERROR:
+      showErrorToast({
+        title: "Forgot Password failed",
+        message: typeof action.data === 'string' ? action.data : 'Request failed'
+      });
+      return {
+        ...state,
+        loading: false,
+        error: typeof action.data === 'string' ? action.data : 'Request failed',
+        message: null,
+        status: 'error',
+      };
+
+    case ApIConstant.API_RESET_ACCOUNT_LOAD:
+      return {
+        ...state,
+        loading: true,
+        error: null,
+        message: null,
+        status: 'loading',
+      };
+
+    case ApIConstant.API_RESET_ACCOUNT_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        error: null,
+        message: action.message ?? null,
+        status: 'success',
+      };
+
+    case ApIConstant.API_RESET_ACCOUNT_ERROR:
+       showErrorToast({
+        title: "Reset Password failed",
+        message: typeof action.data === 'string' ? action.data : 'Request failed'
+      });
+      return {
+        ...state,
+        loading: false,
+        error: typeof action.data === 'string' ? action.data : 'Request failed',
+        message: null,
+        status: 'error',
+      };
+    case ApIConstant.API_RESET_STATE:
       return {
         ...state,
         loading: false,

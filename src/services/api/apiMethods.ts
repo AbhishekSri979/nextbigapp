@@ -75,7 +75,7 @@ const createFailureResponse = (
   url: string,
   status: ApiStatus,
   message: string | null = DEFAULT_ERROR_MESSAGE,
-): ApiMethodResponse<{ msg: string | null }> => ({
+): ApiMethodResponse<{ msg: string | null }> => ({  
   status,
   result: { msg: message ?? DEFAULT_ERROR_MESSAGE },
   _endpoint: url,
@@ -115,8 +115,12 @@ const handleRejectedResponse = (
   const response = axiosError.response;
   const status = response?.status;
 
+  console.log("response::",response);
+  console.log("response::",response?.data?.detail);
+  
+
   if (status && UNAUTHORIZED_STATUS_CODES.has(status)) {
-    return createFailureResponse(url, StatusCodes.Unauthenticate, response?.data?.detail || 'Unauthorized');
+    return createFailureResponse(url, StatusCodes.Unauthenticate, response?.data?.detail);
   }
 
   if (status === SERVICE_UNAVAILABLE_STATUS) {

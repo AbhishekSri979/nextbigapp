@@ -12,3 +12,9 @@ export const registrationApi = async (data: unknown) =>
 
 export const loginApi = async (data: unknown) =>
   Method.POST(`${Users}/login`, apiClient, data, headers);
+
+export const forgotPasswordApi = async (data: unknown) =>
+  Method.POST(`${Users}/forgot-password`, apiClient, data, headers);
+
+export const resetPasswordApi = async (data: unknown) =>
+  Method.POST(`${Users}/reset-password`, apiClient, data, headers);

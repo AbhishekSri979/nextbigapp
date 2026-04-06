@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 
 import {
+  AppLoader,
   AuthBackHeader,
   CustomButton,
   EyeIcon,
@@ -22,6 +23,9 @@ import {
 import type { AuthNavigationProp } from "../../navigation";
 import { colors } from "../../theme/colors";
 import { styles } from "./styles";
+import { useDispatch } from "react-redux";
+import { resetAccountRequestAction, resetStateAction } from "../../store/modules/users/actions";
+import { useAppSelector } from "../../store/hooks";
 
 type ResetPasswordFieldProps = {
   icon: "lock";
@@ -50,9 +54,9 @@ function hexToRgba(hexColor: string, opacity: number): string {
   const sixDigitHex =
     normalizedHex.length === 3
       ? normalizedHex
-          .split("")
-          .map((character) => `${character}${character}`)
-          .join("")
+        .split("")
+        .map((character) => `${character}${character}`)
+        .join("")
       : normalizedHex;
 
   const red = Number.parseInt(sixDigitHex.slice(0, 2), 16);
@@ -273,23 +277,43 @@ function getValidationErrors(
   return nextErrors;
 }
 
-function ResetPasswordScreen(): React.JSX.Element {
+function ResetPasswordScreen(props:any): React.JSX.Element {
+  const dispatch = useDispatch();
   const navigation = useNavigation<AuthNavigationProp<"ResetPassword">>();
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [formErrors, setFormErrors] = useState<ResetPasswordErrors>({});
+  const { email } = props.route.params || {};
+  console.log("email",email);
+  
+  const {
+    loading: isresetPasswordLoading,
+    status: resetPasswordStatus,
+    error: resetPasswordError,
+    message: resetPasswordMessage,
+  } = useAppSelector((state) => state.users);
+
+  useEffect(() => {
+    if (resetPasswordStatus === "success") {
+      showSuccessToast({
+        title: "Password reset successful.",
+        message: resetPasswordMessage ?? "Your password has been reset successfully.",
+      });
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Login" }],
+      });
+      dispatch(resetStateAction());
+    }
+  }, [resetPasswordStatus, resetPasswordMessage, navigation, dispatch]);
 
   const handleBackToLogin = () => {
     if (navigation.canGoBack()) {
       navigation.goBack();
       return;
     }
-
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "Login" }],
-    });
   };
 
   const handleResetPassword = () => {
@@ -311,15 +335,7 @@ function ResetPasswordScreen(): React.JSX.Element {
     }
 
     setFormErrors({});
-    showSuccessToast({
-      title: "Password updated",
-      message: "Your password has been reset. Please log in to continue.",
-    });
-
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "Login" }],
-    });
+    dispatch(resetAccountRequestAction({email, otp, new_password: newPassword }));
   };
 
   return (
@@ -408,6 +424,11 @@ function ResetPasswordScreen(): React.JSX.Element {
           </View>
         </View>
       </ScrollView>
+       <AppLoader
+        visible={isresetPasswordLoading}
+        title="Resetting Password..."
+        subtitle="Please wait while we reset your password."
+      />
     </SafeAreaView>
   );
 }
